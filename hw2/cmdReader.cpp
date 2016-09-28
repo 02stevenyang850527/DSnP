@@ -46,8 +46,12 @@ CmdParser::readCmdInt(istream& istr)
          case HOME_KEY       : moveBufPtr(_readBuf); break;
          case LINE_END_KEY   :
          case END_KEY        : moveBufPtr(_readBufEnd); break;
-         case BACK_SPACE_KEY : /* TODO */moveBufPtr(_readBufPtr - 1);
-							   deleteChar(); break;
+         case BACK_SPACE_KEY : /* TODO */
+							   if (_readBufPtr != _readBuf)
+							   {  moveBufPtr(_readBufPtr - 1);
+							  	  deleteChar(); break; }
+							   else
+							   { mybeep(); break; }
          case DELETE_KEY     : deleteChar(); break;
          case NEWLINE_KEY    : addHistory();
                                cout << char(NEWLINE_KEY);
@@ -58,8 +62,12 @@ CmdParser::readCmdInt(istream& istr)
          case ARROW_LEFT_KEY : /* TODO */moveBufPtr(_readBufPtr - 1); break;
          case PG_UP_KEY      : moveToHistory(_historyIdx - PG_OFFSET); break;
          case PG_DOWN_KEY    : moveToHistory(_historyIdx + PG_OFFSET); break;
-         case TAB_KEY        : /* TODO */insertChar(' ', TAB_POSITION); break;
-         case INSERT_KEY     : // not yet supported; fall through to UNDEFINE
+         case TAB_KEY        : /* TODO */
+						 	   insertChar(' ', TAB_POSITION - ((_readBufPtr - _readBuf) % TAB_POSITION)); break;
+         case INSERT_KEY     : // not yet supported; fall through to UNDEFINE 
+								//cout << "\nThe size of the _history is : " << _history.size();
+								//cout << "\nThe _historyIdx is: " << _historyIdx << endl;
+                               //resetBufAndPrintPrompt(); break;
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
             insertChar(char(pch)); break;
@@ -162,6 +170,7 @@ void
 CmdParser::insertChar(char ch, int repeat)
 {
    // TODO...
+
 	assert(repeat >= 1);
 	char* temp = _readBufPtr;
 	int cur_pos = _readBufPtr - _readBuf;
@@ -174,7 +183,9 @@ CmdParser::insertChar(char ch, int repeat)
 		_readBuf[cur_pos] = ch;
 		moveBufPtr(_readBufEnd);
 	}
-	moveBufPtr(temp+1);
+	moveBufPtr(temp);
+	moveBufPtr(_readBufEnd);
+	moveBufPtr(temp + repeat);
 }
 
 // 1. Delete the line that is currently shown on the screen
@@ -196,7 +207,8 @@ CmdParser::deleteLine()
 {
    // TODO...
 	int len = _readBufEnd - _readBuf;
-	for (int i=0; i < len; i++)
+	int cur_pos = _readBufPtr - _readBuf;
+	for (int i=0; i < cur_pos; i++)
 		cout << '\b';
 	for (int i=0; i < len; i++)
 	{	cout << " ";	_readBuf[i] = 0;}
@@ -230,6 +242,44 @@ void
 CmdParser::moveToHistory(int index)
 {
    // TODO...
+	if (index < _historyIdx)
+	{
+		if (index < 0)	index = 0;
+
+		if (_historyIdx == 0) 
+		{	mybeep(); }
+		else
+		{
+			if (_historyIdx == int(_history.size()) && _readBufEnd - _readBuf != 0)
+			if (_tempCmdStored == false)
+			{	_tempCmdStored = true; _history.push_back(_readBuf); }
+
+			_historyIdx = index;
+			retrieveHistory();
+		}
+	}
+	
+	if (index > _historyIdx)
+	{
+		if (_historyIdx >= int(_history.size()))
+			mybeep();
+		else
+		{
+			if ( index > int(_history.size()) )
+			{	index = _history.size()-1; _historyIdx = _history.size()-1; }
+
+			if (_historyIdx == int(_history.size()) - 1)
+			{	
+				if (_tempCmdStored == false)
+				{	deleteLine(); _historyIdx++; }
+				else
+				{	retrieveHistory(); _historyIdx++; }
+			}
+			
+			if (_historyIdx < int(_history.size()) - 1)
+			{	_historyIdx = index; retrieveHistory(); }
+		}
+	}
 }
 
 
@@ -249,6 +299,40 @@ void
 CmdParser::addHistory()
 {
    // TODO...
+	if ((_readBuf != _readBufPtr) || (_readBuf != _readBufEnd))
+	{
+		int start = 0;
+		int end = _readBufEnd - _readBuf;
+		string tmp;
+		
+		while(_readBuf[start] == ' ')
+			start++;
+		while(_readBuf[end-1] == ' ')
+		{	if (end > start)
+				end--;
+			else break;
+		}
+		if (start != end)
+		{
+			for (int i = start; i < end; i++)
+				tmp += _readBuf[i];
+
+			if (_tempCmdStored == false)
+				_history.push_back(tmp);
+			else 
+			{
+				_history.pop_back();
+				_history.push_back(tmp);
+			}
+			_tempCmdStored = false;
+		}
+		if (start == end && _tempCmdStored == true)
+		{	
+			_tempCmdStored = false;
+			_history.pop_back();
+		}
+	}
+	_historyIdx = _history.size();
 }
 
 
