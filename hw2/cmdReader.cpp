@@ -216,7 +216,7 @@ CmdParser::deleteLine()
 		cout << '\b';
 	_readBufEnd = _readBuf;
 	_readBufPtr = _readBufEnd;
-	*_readBufPtr = 0;
+	*_readBufEnd = 0;
 }
 
 
@@ -265,7 +265,7 @@ CmdParser::moveToHistory(int index)
 			mybeep();
 		else
 		{
-			if ( index > int(_history.size()) )
+			if ( index >= int(_history.size()) )
 			{	index = _history.size()-1; _historyIdx = _history.size()-1; }
 
 			if (_historyIdx == int(_history.size()) - 1)
@@ -273,7 +273,7 @@ CmdParser::moveToHistory(int index)
 				if (_tempCmdStored == false)
 				{	deleteLine(); _historyIdx++; }
 				else
-				{	retrieveHistory(); _historyIdx++; }
+				{	retrieveHistory(); _history.pop_back(); _tempCmdStored = false; }
 			}
 			
 			if (_historyIdx < int(_history.size()) - 1)
