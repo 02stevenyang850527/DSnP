@@ -273,13 +273,17 @@ CmdParser::moveToHistory(int index)
 				if (_tempCmdStored == false)
 				{	deleteLine(); _historyIdx++; }
 				else
-				{	retrieveHistory(); _history.pop_back(); _tempCmdStored = false; }
+				{	retrieveHistory(); _history.pop_back(); _tempCmdStored = false;}
 			}
 			
 			if (_historyIdx < int(_history.size()) - 1)
-			{	_historyIdx = index; retrieveHistory(); }
+			{	_historyIdx = index; retrieveHistory(); 
+				if (_historyIdx == int(_history.size()-1) && _tempCmdStored == true)
+				{	_history.pop_back(); _tempCmdStored = false; }
+			}
 		}
 	}
+
 }
 
 
