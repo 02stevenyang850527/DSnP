@@ -65,9 +65,9 @@ CmdParser::readCmdInt(istream& istr)
          case TAB_KEY        : /* TODO */
 						 	   insertChar(' ', TAB_POSITION - ((_readBufPtr - _readBuf) % TAB_POSITION)); break;
          case INSERT_KEY     : // not yet supported; fall through to UNDEFINE 
-								//cout << "\nThe size of the _history is : " << _history.size();
-								//cout << "\nThe _historyIdx is: " << _historyIdx << endl;
-                               //resetBufAndPrintPrompt(); break;
+							//	cout << "\nThe size of the _history is : " << _history.size();
+							//	cout << "\nThe _historyIdx is: " << _historyIdx << endl;
+                            //   resetBufAndPrintPrompt(); break;
          case UNDEFINED_KEY:   mybeep(); break;
          default:  // printable character
             insertChar(char(pch)); break;
@@ -273,13 +273,17 @@ CmdParser::moveToHistory(int index)
 				if (_tempCmdStored == false)
 				{	deleteLine(); _historyIdx++; }
 				else
-				{	retrieveHistory(); _history.pop_back(); _tempCmdStored = false; }
+				{	retrieveHistory(); _history.pop_back(); _tempCmdStored = false;}
 			}
 			
 			if (_historyIdx < int(_history.size()) - 1)
-			{	_historyIdx = index; retrieveHistory(); }
+			{	_historyIdx = index; retrieveHistory(); 
+				if (_historyIdx == int(_history.size()-1) && _tempCmdStored == true)
+				{	_history.pop_back(); _tempCmdStored = false; }
+			}
 		}
 	}
+
 }
 
 
@@ -331,6 +335,11 @@ CmdParser::addHistory()
 			_tempCmdStored = false;
 			_history.pop_back();
 		}
+	}
+	else
+	{
+	if (_tempCmdStored == true)
+	{	_history.pop_back(); _tempCmdStored = false; }
 	}
 	_historyIdx = _history.size();
 }
