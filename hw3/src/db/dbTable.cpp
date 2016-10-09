@@ -26,13 +26,13 @@ ostream& operator << (ostream& os, const DBRow& r)
    // - Data are seperated by a space. No trailing space at the end.
    // - Null cells are printed as '.'
 	for (size_t i=0; i < r.size()-1; i++){
-		if (r[i] == NULL)
+		if (r[i] == INT_MAX)
 			os << '.' << ' ';
 		else
 			os << r[i] << ' ';
 	}
 
-	if (r[r.size()-1] == NULL)
+	if (r[r.size()-1] == INT_MAX)
 		os << '.' << ' ';
 	else
 		os << r[r.size()-1] << ' ';
@@ -45,19 +45,19 @@ ostream& operator << (ostream& os, const DBTable& t)
    // TODO: to print out a table
    // - Data are seperated by setw(6) and aligned right.
    // - Null cells are printed as '.'
-	for ( int i=0; i < t.nRows()-1; i++){
-		for ( int j=0; j < t[i].size(); j++)
-			if (t[i][j] == NULL)
+	for ( size_t i=0; i < t.nRows(); i++){
+		for ( size_t j=0; j < t[i].size(); j++)
+			if (t[i][j] == INT_MAX)
 				os << right << setw(6) << '.' << ' ';
 			else
 				os << right << setw(6) <<  t[i][j] << ' ';
 		os << endl;
 	}
-	for (int j=0; j < t[t.nRows()-1].size(); j++)
-		if (t[t.nRows()-1][j] == NULL)
+/*	for (int j=0; j < t[t.nRows()-1].size(); j++)
+		if (t[t.nRows()-1][j] == INT_MAX)
 			os << right << setw(6) << '.' << ' ';
 		else
-			os << right << setw(6) <<  t[t.nRows()-1][j] << ' ';
+			os << right << setw(6) <<  t[t.nRows()-1][j] << ' ';*/
    return os;
 }
 
@@ -70,8 +70,8 @@ ifstream& operator >> (ifstream& ifs, DBTable& t)
 	DBRow temp;
 	vector<string> result;
 	getline(ifs, line);
-	int size  = line.length();
-	for (int i = 0; i < size; i++)
+	size_t size  = line.length();
+	for (size_t i = 0; i < size; i++)
 	{
 		size_t pos = line.find(char(13),i);
 		if (pos < size)
@@ -81,6 +81,8 @@ ifstream& operator >> (ifstream& ifs, DBTable& t)
 			i = pos;
 		}
 	}
+
+	result.pop_back();
 
 	for (size_t i=0; i < result.size(); i++){
 		istringstream s(result[i]);
@@ -94,11 +96,11 @@ ifstream& operator >> (ifstream& ifs, DBTable& t)
 				s >> dummy;
 				last = true;
 				if (int(dummy) == 44 && first == true)
-					temp.addData(NULL);
+					temp.addData(INT_MAX);
 				if (int(dummy) == 44)
 					count++;
 				if (count >= 2)
-					temp.addData(NULL);
+					temp.addData(INT_MAX);
 				continue;
 			}
 			temp.addData(num);
@@ -106,7 +108,7 @@ ifstream& operator >> (ifstream& ifs, DBTable& t)
 			count = 0;
 		}
 		if (last == true)
-			temp.addData(NULL);
+			temp.addData(INT_MAX);
 		t.addRow(temp); temp.reset();
 	}
 	return ifs;
@@ -175,21 +177,48 @@ float
 DBTable::getMax(size_t c) const
 {
    // TODO: get the max data in column #c
-   return 0.0;
+	float max = INT_MIN ;
+	bool empty = true;
+	for (size_t i=0; i < _table.size(); i++)
+		if (_table[i][c] > max && _table[i][c] != INT_MAX)
+		{	max = _table[i][c]; empty = false;}
+
+	if (empty == false)
+		return max;
+	else 
+		return NAN;
 }
 
 float
 DBTable::getMin(size_t c) const
 {
    // TODO: get the min data in column #c
-   return 0.0;
+	float min = INT_MAX - 1;
+	bool empty = true;
+	for (size_t i=0; i < _table.size(); i++)
+		if (_table[i][c] < min && _table[i][c] != INT_MAX)
+		{	min = _table[i][c]; empty = false;}
+
+	if (empty == false)
+		return min;
+	else 
+		return NAN;
 }
 
 float 
 DBTable::getSum(size_t c) const
 {
    // TODO: compute the sum of data in column #c
-   return 0.0;
+	float sum = 0;
+	bool empty = true;
+	for (size_t i=0; i < _table.size(); i++)
+		if (_table[i][c] != INT_MAX )
+		{	sum += _table[i][c]; empty = false;}
+
+	if (empty == false)
+		return sum;
+	else 
+		return NAN;
 }
 
 int
@@ -197,14 +226,37 @@ DBTable::getCount(size_t c) const
 {
    // TODO: compute the number of distinct data in column #c
    // - Ignore null cells
-   return 0;
+	int count = 0;
+	bool repeat = false;
+	for (size_t i=0; i < _table.size(); i++){
+		if (_table[i][c] != INT_MAX){
+			int temp = _table[i][c];
+			repeat = false;
+			for (size_t j=0; j < i; j++)
+				if (_table[j][c] == temp)
+					repeat = true;
+			if (repeat == false)
+				count++;
+		}
+	}
+	return count;
 }
 
 float
 DBTable::getAve(size_t c) const
 {
    // TODO: compute the average of data in column #c
-   return 0.0;
+	float sum = 0;
+	float count = 0 ;
+	bool empty = true;
+	for (size_t i=0; i < _table.size(); i++)
+		if (_table[i][c] != INT_MAX )
+		{	sum += _table[i][c]; empty = false; count++;}
+
+	if (empty == false)
+		return sum/count;
+	else 
+		return NAN;
 }
 
 void
@@ -219,6 +271,16 @@ DBTable::printCol(size_t c) const
    // TODO: to print out a column.
    // - Data are seperated by a space. No trailing space at the end.
    // - Null cells are printed as '.'
+	for (size_t i=0; i < _table.size()-1; i++)
+		if (_table[i][c] == INT_MAX)
+			cout << '.' << ' ';
+		else
+			cout << _table[i][c] << ' ';
+
+	if (_table[_table.size()-1][c] == INT_MAX)
+		cout << '.' << ' ';
+	else
+		cout << _table[_table.size()-1][c] << ' ';
 }
 
 void
