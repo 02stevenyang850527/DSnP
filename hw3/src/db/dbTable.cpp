@@ -132,8 +132,15 @@ DBSort::operator() (const DBRow& r1, const DBRow& r2) const
 {
    // TODO: called as a functional object that compares the data in r1 and r2
    //       based on the order defined in _sortOrder
-	
-   return false;
+	size_t n = _sortOrder.size();
+	for (size_t i=0; i < n; i++)
+		if (r1[_sortOrder[i]] != r2[_sortOrder[i]])
+		{	if (r1[_sortOrder[i]] < r2[_sortOrder[i]])
+				return true;
+			if (r1[_sortOrder[i]] > r2[_sortOrder[i]])
+				return false;
+		}
+	return false;
 }
 
 /*****************************************/
@@ -263,6 +270,7 @@ void
 DBTable::sort(const struct DBSort& s)
 {
    // TODO: sort the data according to the order of columns in 's'
+	std::sort(_table.begin(), _table.end(), s);
 }
 
 void
