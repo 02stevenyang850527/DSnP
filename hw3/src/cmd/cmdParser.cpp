@@ -30,10 +30,10 @@ CmdParser::openDofile(const string& dof)
 {
    // TODO...
 	_dofile = new ifstream(dof.c_str());
+	_dofileStack.push(_dofile);
 	if (!_dofile->is_open())
 	{	closeDofile(); return false; }
-	else
-	{	_dofileStack.push(_dofile); return true; }
+	else  return true; 
 }
 
 // Must make sure _dofile != 0
@@ -43,14 +43,12 @@ CmdParser::closeDofile()
 	assert(_dofile != 0);
    // TODO...
 	_dofile->close();
-	delete _dofile; 
+	delete _dofile;
+	_dofileStack.pop();
 	if (_dofileStack.empty())
 		_dofile = 0;
 	else
-	{
-		_dofileStack.pop();
 		_dofile = _dofileStack.top();
-	}
 }
 
 // Return false if registration fails
@@ -164,7 +162,8 @@ CmdParser::parseCmd(string& option)
 	CmdExec* e = getCmd(tokens[0]);
 	if (e != 0){
 		for (size_t i=1; i < tokens.size(); i++)
-			option += tokens[i];
+		{	option += tokens[i]; option += " ";}
+		option = option.substr(0, option.length()-1);
 		return e;
 	}
 
@@ -255,11 +254,13 @@ CmdParser::getCmd(string cmd)
 {
 	CmdExec* e = 0;
    // TODO...
-	for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i)
-		if (myStrNCmp(cmd, i->first, i->first.length()) > 0)
+	for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i){
+		string str = i->first + i->second->getOptCmd();
+		if (myStrNCmp(str, cmd, i->first.length()) == 0)
 		{	e = i->second;
 			return e;
 		}
+	}
 	return 0;
 }
 
