@@ -48,9 +48,9 @@ ostream& operator << (ostream& os, const DBTable& t)
 	for ( size_t i=0; i < t.nRows(); i++){
 		for ( size_t j=0; j < t[i].size(); j++)
 			if (t[i][j] == INT_MAX)
-				os << right << setw(6) << '.' << ' ';
+				os << right << setw(6) << '.';
 			else
-				os << right << setw(6) <<  t[i][j] << ' ';
+				os << right << setw(6) << t[i][j];
 		os << endl;
 	}
 /*	for (int j=0; j < t[t.nRows()-1].size(); j++)
