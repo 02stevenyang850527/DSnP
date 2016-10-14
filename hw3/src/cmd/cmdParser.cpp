@@ -259,16 +259,19 @@ CmdParser::listCmd(const string& str)
 	if (tokens.size() == 1){
 		for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i){
 			string temp = i->first + i->second->getOptCmd();
-			if (myStrNCmp(temp, tokens[0], tokens[0].size()) == 0)
+			if (temp.size() >= tokens[0].size())
+			if (myStrNCmp(temp, tokens[0], tokens[0].length()) == 0) 
 				list.push_back(temp);
 		}
 
 		if (list.size() == 0)
 			mybeep();    // #4 done
 		else if (int(list.size()) == 1){
-			for (size_t i = tokens[0].length(); i < list[0].length(); i++)
-				insertChar(list[0][i]);
-			insertChar(' ');
+			if (str.length() == tokens[0].length()){
+				for (size_t i = tokens[0].length(); i < list[0].length(); i++)
+					insertChar(list[0][i]);
+				insertChar(' ');
+			}
 		}
 		else
 		{	cout << endl;
@@ -280,20 +283,27 @@ CmdParser::listCmd(const string& str)
 		}
 	}  // #2, #3 done
 
-	if (tokens.size() > 1){
+	if (tokens.size() >= 1 && (str.length() > tokens[0].size()) ){
+		list.clear();
 		for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i){
 			string temp = i->first + i->second->getOptCmd();
-			if (myStrNCmp(temp, tokens[0], tokens[0].size()) == 0)
+			if (temp.size() >= tokens[0].size())
+			if (myStrNCmp(temp, tokens[0], tokens[0].length()) == 0)
 				list.push_back(temp);
 		}
 
-		if (list.size() != 0)
+		if (list.size() == 0)
 			mybeep();         // #6 done
 		if (list.size() == 1){
 			for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i)
 				if (myStrNCmp(list[0], i->first, i->first.length()) == 0)
 				{	cout << endl; i->second->usage(cout); reprintCmd(); return; }
 		}
+	/*	if (list.size() > 1)
+		{	cerr << "\nsomething shit happens!\n";    // for self-check 
+			for (size_t i =0; i < list.size(); i++)
+				cout << list[i] << endl;
+		}*/
 	}
 }
 
