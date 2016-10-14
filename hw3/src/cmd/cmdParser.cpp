@@ -236,6 +236,65 @@ void
 CmdParser::listCmd(const string& str)
 {
    // TODO...
+	vector<string> list;
+	vector<string> tokens;
+	string token;
+	size_t n = myStrGetTok(str, token);
+	while (token.size()){
+		tokens.push_back(token);
+		n = myStrGetTok(str, token, n);
+	}
+
+	if (tokens.size() == 0){
+		for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i)
+			list.push_back(i->first + i->second->getOptCmd());
+		cout << endl;
+		for (int i=0; i < int(list.size()); i++){
+			cout << setw(12) << left << list[i];
+			if ((i+1) % 5 == 0) cout << endl;
+		}
+		reprintCmd();
+	}	// #1 done
+
+	if (tokens.size() == 1){
+		for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i){
+			string temp = i->first + i->second->getOptCmd();
+			if (myStrNCmp(temp, tokens[0], tokens[0].size()) == 0)
+				list.push_back(temp);
+		}
+
+		if (list.size() == 0)
+			mybeep();    // #4 done
+		else if (int(list.size()) == 1){
+			for (size_t i = tokens[0].length(); i < list[0].length(); i++)
+				insertChar(list[0][i]);
+			insertChar(' ');
+		}
+		else
+		{	cout << endl;
+			for (int i=0; i < int(list.size()); i++){
+				cout << setw(12) << left << list[i];
+			if ((i+1) % 5 == 0 && i != int(list.size()) - 1) cout << endl;
+			}
+			reprintCmd();
+		}
+	}  // #2, #3 done
+
+	if (tokens.size() > 1){
+		for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i){
+			string temp = i->first + i->second->getOptCmd();
+			if (myStrNCmp(temp, tokens[0], tokens[0].size()) == 0)
+				list.push_back(temp);
+		}
+
+		if (list.size() != 0)
+			mybeep();         // #6 done
+		if (list.size() == 1){
+			for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i)
+				if (myStrNCmp(list[0], i->first, i->first.length()) == 0)
+				{	cout << endl; i->second->usage(cout); reprintCmd(); return; }
+		}
+	}
 }
 
 // cmd is a copy of the original input
