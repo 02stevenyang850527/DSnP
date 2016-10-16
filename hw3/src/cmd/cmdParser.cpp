@@ -297,7 +297,12 @@ CmdParser::listCmd(const string& str)
 		if (list.size() == 1){
 			for (CmdMap::const_iterator i = _cmdMap.begin(); i != _cmdMap.end(); ++i)
 				if (myStrNCmp(list[0], i->first, i->first.length()) == 0)
-				{	cout << endl; i->second->usage(cout); reprintCmd(); return; }
+				{	if (tokens[0].length() >= i->first.length())
+					{	cout << endl; i->second->usage(cout); reprintCmd();}
+					else 
+						mybeep();
+					 return; 
+				}
 		}
 	/*	if (list.size() > 1)
 		{	cerr << "\nsomething shit happens!\n";    // for self-check 
