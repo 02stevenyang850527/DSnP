@@ -333,12 +333,39 @@ private:
       #endif // MEM_DEBUG
 		t = toSizeT(t);
 		if (t > _blockSize)
-			cerr << "Requested memory (" << t << ") is greater than block size" 
-				 << "(" << _blockSize << "). " << "Exception raised...\n";       // bad_alloc()
-      #ifdef MEM_DEBUG
-          cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
-      #endif // MEM_DEBUG
+		{	cerr << "Requested memory (" << t << ") is greater than block size" 
+				 << "(" << _blockSize << "). " << "Exception raised...\n";       // hint 2
+			throw bad_alloc();
+		}
+		size_t n = getArraySize(t);
+		ret = getMemRecycleList(n)->popFront();
 
+		if (ret != 0){
+         #ifdef MEM_DEBUG
+        	  cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
+         #endif // MEM_DEBUG	hint 3
+		}
+		else{
+			if ( !_activeBlock->getMem(t, ret)){
+				if (_activeBlock->getRemainSize() >= toSizeT(S)){
+					size_t rn = getArraySize(_activeBlock->getRemainSize());            //ret maybe revised?
+                    #ifdef MEM_DEBUG
+                    cout << "Recycling " << ret << " to _recycleList[" << rn << "]\n";
+                    #endif // MEM_DEBUG
+					getMemRecycleList(rn)->pushFront(ret);
+				}
+				_activeBlock = new MemBlock<T>(_activeBlock, _blockSize);
+				_activeBlock->getMem(t, ret);
+                #ifdef MEM_DEBUG
+                cout << "New MemBlock... " << _activeBlock << endl;
+                #endif // MEM_DEBUG
+			}
+		}
+
+       #ifdef MEM_DEBUG
+       cout << "Memory acquired... " << ret << endl;
+       #endif // MEM_DEBUG
+		
       // TODO ---
       // 1. Make sure to promote t to a multiple of SIZE_T
       // 2. Check if the requested memory is greater than the block size.
@@ -366,7 +393,13 @@ private:
    // Get the currently allocated number of MemBlock's
    size_t getNumBlocks() const {
       // TODO
-      return 0;
+		size_t count = 0;
+		MemBlock<T>* temp = _activeBlock;
+		while (temp){
+			count++;
+			temp = temp->getNextBlock();
+		}
+		return count;
    }
 
 };
