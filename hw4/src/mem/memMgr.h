@@ -129,7 +129,8 @@ class MemRecycleList
       // TODO
 	if (_first == 0)
 		return 0;
-	_first = getNext(_first);
+	T* temp = _first;
+	_first = getNext(temp);
 	return _first;
    }
    // push the element 'p' to the beginning of the recycle list
@@ -211,7 +212,7 @@ public:
 		_activeBlock->reset();
 		for (int i=0; i < R_SIZE; i++)
 			_recycleList[i].reset();
-		if (b != _blocksize)
+		if (b != _blockSize)
 		{	delete _activeBlock;
 			_activeBlock = new MemBlock<T>(0, _blockSize);
 		}
@@ -298,10 +299,7 @@ private:
       assert(t % SIZE_T == 0);
       assert(t >= S);
       // TODO
-		if (t == toSizeT(S))
-			return 0;
-		else
-			return (t - SIZE_T) / S;
+		return (t - SIZE_T) / S;
    }
    // Go through _recycleList[m], its _nextList, and _nexList->_nextList, etc,
    //    to find a recycle list whose "_arrSize" == "n"
@@ -314,27 +312,38 @@ private:
    MemRecycleList<T>* getMemRecycleList(size_t n) {
       size_t m = n % R_SIZE;
       // TODO
-      return 0;
+	MemRecycleList<T>* temp = &(_recycleList[m]);
+	while (temp){
+		if (temp->getArrSize() != n)
+			temp = temp->_nextList;
+		else
+			return temp;
+	}
+	MemRecycleList<T>* l = new MemRecycleList<T>(n);
+	temp->setNextList(l);
+	temp = temp->getNextList();
+	return temp;
    }
    // t is the #Bytes requested from new or new[]
-   // Note: Make sure the returned memory is a multiple of SIZE_T
+   // Note: Make sure the returned memory is a multiple of SIZE_T 
    T* getMem(size_t t) {
       T* ret = 0;
       #ifdef MEM_DEBUG
       cout << "Calling MemMgr::getMem...(" << t << ")" << endl;
       #endif // MEM_DEBUG
+		t = toSizeT(t);
+		if (t > _blockSize)
+			cerr << "Requested memory (" << t << ") is greater than block size" 
+				 << "(" << _blockSize << "). " << "Exception raised...\n";       // bad_alloc()
+      #ifdef MEM_DEBUG
+          cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
+      #endif // MEM_DEBUG
+
       // TODO ---
       // 1. Make sure to promote t to a multiple of SIZE_T
       // 2. Check if the requested memory is greater than the block size.
       //    If so, throw a "bad_alloc()" exception.
-      //    cerr << "Requested memory (" << t << ") is greater than block size"
-      //         << "(" << _blockSize << "). " << "Exception raised...\n";
       // 3. Check the _recycleList first...
-      //    #ifdef MEM_DEBUG
-      //    cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
-      //    #endif // MEM_DEBUG
-      //    => 'n' is the size of array
-      //    => "ret" is the return address
 
       // If no match from recycle list...
       // 4. Get the memory from _activeBlock
