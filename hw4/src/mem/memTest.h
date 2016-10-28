@@ -62,8 +62,12 @@ public:
    // Allocate "n" number of MemTestObj arrays with size "s"
    void newArrs(size_t n, size_t s) {
       // TODO
-	for (size_t i=0; i < n; i++)
-		_arrList.push_back(new MemTestObj[s]);
+	for (size_t i=0; i < n; i++){
+		try
+		{	_arrList.push_back(new MemTestObj[s]); }
+		catch(bad_alloc& ba){ break;}
+	}
+
    }
    // Delete the object with position idx in _objList[]
    void deleteObj(size_t idx) {
