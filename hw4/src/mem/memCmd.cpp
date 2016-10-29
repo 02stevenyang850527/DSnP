@@ -49,6 +49,7 @@ MTResetCmd::exec(const string& option)
       }
       #ifdef MEM_MGR_H
       mtest.reset(toSizeT(b));
+		cout << "hahah" << endl;
       #else
       mtest.reset();
       #endif // MEM_MGR_H
@@ -173,26 +174,53 @@ MTDeleteCmd::exec(const string& option)
 		return CmdExec::errorOption(CMD_OPT_MISSING, "");
 
 	int num;
-	if (myStrNCmp("-Index", tokens[0], 2)){
+	if (myStrNCmp("-Index", tokens[0], 2) == 0){
 		if (tokens.size() == 1)
 			return CmdExec::errorOption(CMD_OPT_MISSING, tokens[0]);
 		if (!myStr2Int(tokens[1], num) || num < 0)
 			return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
-
-		if (tokens.size() == 2)
-		{	if (num >= mtest.getObjListSize())
-				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+		else{
+			if (tokens.size() == 2)
+			{	if (num >= int(mtest.getObjListSize()))
+					return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+				else{
+					mtest.deleteObj(num);
+					 return CMD_EXEC_DONE; 
+				}
+			}
 			else{
-				mtset.deleteObj(num); return CMD_EXEC_DONE; 
+				if (myStrNCmp("-Array", tokens[2], 2) == 0){
+					if (tokens.size() == 3)
+					{	if (num < int(mtest.getArrListSize()))
+						{	mtest.deleteArr(num); return CMD_EXEC_DONE; } 
+						else
+							return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+					}
+					else
+						return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
+				}
+				else
+					return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
 			}
 		}
+	}
+	else if (myStrNCmp("-Random", tokens[0], 2) == 0){
+		if (tokens.size() == 1)
+			return CmdExec::errorOption(CMD_OPT_MISSING, tokens[0]);
+		if (!myStr2Int(tokens[1], num) || num < 1)
+			return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+		
+		if (tokens.size() == 2){
+			for (int i=0; i < num; i++)
+				mtest.deleteObj(rnGen(mtest.getObjListSize()));
+			return CMD_EXEC_DONE;
+		}
 		else{
-			if (myStrNCmp("-Array", tokens[2], 2)){
-				if (tokens.size() == 3)
-				{	if (num < mtest.getArrListSize())
-					{	mtest.deleteArr(num); return CMD_EXEC_DONE; } 
-					else
-						return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+			if (myStrNCmp("-Array", tokens[2], 2) == 0){
+				if (tokens.size() == 3){
+					for (int i=0; i < num; i++)
+						mtest.deleteArr(rnGen(mtest.getArrListSize()));
+					return CMD_EXEC_DONE;
 				}
 				else
 					return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
@@ -201,19 +229,51 @@ MTDeleteCmd::exec(const string& option)
 				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
 		}
 	}
-	else if (myStrNCmp("-Random", tokens[0], 2)){
+	else if (myStrNCmp("-Array", tokens[0], 2)){
 		if (tokens.size() == 1)
 			return CmdExec::errorOption(CMD_OPT_MISSING, tokens[0]);
-		if (!myStr2Int(tokens[1], num) || num < 0)
-			return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
-		
-		if (tokens.size() == 2){
-		}			//TODO zzz
+		if (myStrNCmp("-Index", tokens[1], 2)){
+			if (tokens.size() == 2)
+				return CmdExec::errorOption(CMD_OPT_MISSING, tokens[1]);
+			if (!myStr2Int(tokens[2], num) || num < 0)
+				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
+			else{
+				if (tokens.size() == 3){
+					if (num < int(mtest.getArrListSize())){
+						mtest.deleteArr(num); return CMD_EXEC_DONE;
+					}
+					else
+						return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
+				}
+				else
+					return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
+			}
+		}
+		else if (myStrNCmp("-Random", tokens[1], 2) == 0){
+			if (tokens.size() == 2)
+				return CmdExec::errorOption(CMD_OPT_MISSING, tokens[1]);
+			if (!myStr2Int(tokens[2], num) || num < 1)
+				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
+			else{
+				if (tokens.size() == 3){
+					for (int i=0; i < num; i++)
+						mtest.deleteArr(rnGen(mtest.getArrListSize()));
+					return CMD_EXEC_DONE;
+				}
+				else
+					return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
+			}
+		}
+		else{
+			int temp;
+			if (myStr2Int(tokens[1], temp))
+				return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[1]);
+			else
+				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+		}
 	}
-	else if
 	else
-	
-	return CMD_EXEC_DONE;
+		return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[0]);
 }
 
 void
