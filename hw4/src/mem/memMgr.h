@@ -17,7 +17,7 @@
 using namespace std;
 
 // Turn this on for debugging
-#define MEM_DEBUG
+//#define MEM_DEBUG
 
 //--------------------------------------------------------------------------
 // Define MACROs
@@ -47,7 +47,7 @@ private:                                                                    \
 //
 // To promote 't' to the nearest multiple of SIZE_T; 
 // e.g. Let SIZE_T = 8;  toSizeT(7) = 8, toSizeT(12) = 16
-#define toSizeT(t)   (downtoSizeT(t + SIZE_T_1))  // TODO
+#define toSizeT(t)   (((t + SIZE_T_1)/SIZE_T) * SIZE_T)  // TODO
 //
 // To demote 't' to the nearest multiple of SIZE_T
 // e.g. Let SIZE_T = 8;  downtoSizeT(9) = 8, downtoSizeT(100) = 96
@@ -131,7 +131,7 @@ class MemRecycleList
 		return 0;
 	T* temp = _first;
 	_first = getNext(temp);
-	return _first;
+	return temp;
    }
    // push the element 'p' to the beginning of the recycle list
    void  pushFront(T* p) {
@@ -316,15 +316,18 @@ private:
       size_t m = n % R_SIZE;
       // TODO
 	MemRecycleList<T>* temp = &(_recycleList[m]);
+	MemRecycleList<T>* temp1;
 	while (temp){
-		if (temp->getArrSize() != n)
+		if (temp->getArrSize() != n){
+			temp1 = temp;
 			temp = temp->_nextList;
+		}
 		else
 			return temp;
 	}
 	MemRecycleList<T>* l = new MemRecycleList<T>(n);
-	temp->setNextList(l);
-	temp = temp->getNextList();
+	temp1->setNextList(l);
+	temp = temp1->getNextList();
 	return temp;
    }
    // t is the #Bytes requested from new or new[]
