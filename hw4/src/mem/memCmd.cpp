@@ -49,7 +49,6 @@ MTResetCmd::exec(const string& option)
       }
       #ifdef MEM_MGR_H
       mtest.reset(toSizeT(b));
-		cout << "hahah" << endl;
       #else
       mtest.reset();
       #endif // MEM_MGR_H
@@ -181,8 +180,11 @@ MTDeleteCmd::exec(const string& option)
 			return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
 		else{
 			if (tokens.size() == 2)
-			{	if (num >= int(mtest.getObjListSize()))
+			{	if (num >= int(mtest.getObjListSize())){
+         			cerr << "Size of object list (" << mtest.getObjListSize() << ") "
+						 << "is <= (" << num << ")!!" << endl;
 					return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+				}
 				else{
 					mtest.deleteObj(num);
 					 return CMD_EXEC_DONE; 
@@ -193,8 +195,11 @@ MTDeleteCmd::exec(const string& option)
 					if (tokens.size() == 3)
 					{	if (num < int(mtest.getArrListSize()))
 						{	mtest.deleteArr(num); return CMD_EXEC_DONE; } 
-						else
+						else{
+         					cerr << "Size of array list (" << mtest.getArrListSize() << ") "
+								 << "is <= (" << num << ")!!" << endl;
 							return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
+						}
 					}
 					else
 						return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
@@ -211,6 +216,10 @@ MTDeleteCmd::exec(const string& option)
 			return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
 		
 		if (tokens.size() == 2){
+			if (mtest.getObjListSize() == 0)
+			{	cerr << "Size of object list is 0!!" << endl;
+				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[0]);
+			}
 			for (int i=0; i < num; i++)
 				mtest.deleteObj(rnGen(mtest.getObjListSize()));
 			return CMD_EXEC_DONE;
@@ -218,6 +227,10 @@ MTDeleteCmd::exec(const string& option)
 		else{
 			if (myStrNCmp("-Array", tokens[2], 2) == 0){
 				if (tokens.size() == 3){
+					if (mtest.getArrListSize() == 0)
+					{	cerr << "Size of array list is 0!!" << endl;
+						return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[0]);
+					}
 					for (int i=0; i < num; i++)
 						mtest.deleteArr(rnGen(mtest.getArrListSize()));
 					return CMD_EXEC_DONE;
@@ -229,10 +242,10 @@ MTDeleteCmd::exec(const string& option)
 				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
 		}
 	}
-	else if (myStrNCmp("-Array", tokens[0], 2)){
+	else if (myStrNCmp("-Array", tokens[0], 2) == 0){
 		if (tokens.size() == 1)
 			return CmdExec::errorOption(CMD_OPT_MISSING, tokens[0]);
-		if (myStrNCmp("-Index", tokens[1], 2)){
+		if (myStrNCmp("-Index", tokens[1], 2) == 0){
 			if (tokens.size() == 2)
 				return CmdExec::errorOption(CMD_OPT_MISSING, tokens[1]);
 			if (!myStr2Int(tokens[2], num) || num < 0)
@@ -242,8 +255,11 @@ MTDeleteCmd::exec(const string& option)
 					if (num < int(mtest.getArrListSize())){
 						mtest.deleteArr(num); return CMD_EXEC_DONE;
 					}
-					else
+					else{
+         				cerr << "Size of array list (" << mtest.getArrListSize() << ") "
+							 << "is <= (" << num << ")!!" << endl;
 						return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
+					}
 				}
 				else
 					return CmdExec::errorOption(CMD_OPT_EXTRA, tokens[3]);
@@ -256,6 +272,10 @@ MTDeleteCmd::exec(const string& option)
 				return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[2]);
 			else{
 				if (tokens.size() == 3){
+					if (mtest.getArrListSize() == 0)
+					{	cerr << "Size of array list is 0" << endl;
+						return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[0]);
+					}
 					for (int i=0; i < num; i++)
 						mtest.deleteArr(rnGen(mtest.getArrListSize()));
 					return CMD_EXEC_DONE;
