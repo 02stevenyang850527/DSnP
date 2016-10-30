@@ -215,9 +215,12 @@ public:
 		_activeBlock->reset();
 		for (int i=0; i < R_SIZE; i++)
 			_recycleList[i].reset();
-		if (b != _blockSize)
-		{	delete _activeBlock;
-			_activeBlock = new MemBlock<T>(0, _blockSize);
+		if (b != 0)
+		{	if (b != _blockSize)
+			{	delete _activeBlock;
+				_blockSize = b;
+				_activeBlock = new MemBlock<T>(0, _blockSize);
+			}
 		}
    }
    // Called by new
