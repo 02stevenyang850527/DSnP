@@ -86,7 +86,8 @@ public:
 			else
 				resize(2*_size);
 		}
-		_data[++_size] = x;
+		_data[_size] = x;
+		_size++;
 	}
 
    void pop_front() {
@@ -106,19 +107,26 @@ public:
 
    bool erase(iterator pos) { 
 		if (_size == 0)	return false;
-		*pos = *(end());
+		*pos = *(--end());
 		--_size;
 		return true;
 	}
    bool erase(const T& x) { 
 		if (_size == 0)	return false;
 		for (size_t i = 0 ; i < _size; i++){
-			if (_data[i] == x)
-				
+			if (_data[i] == x){
+				_data[i] = *(--end());
+				--_size;
+				return true;
+			}	
 		}
+		return false;
 	}
 
-   void clear() { }
+   void clear() { 
+		if (_data == 0) return;
+		_size = 0;
+	}
 
    // This is done. DO NOT change this one.
    void sort() const { if (!empty()) ::sort(_data, _data+_size); }
@@ -129,7 +137,7 @@ public:
 		if (n < _size) return;
 		T* temp = _data;
 		_data = new T[n];
-		for (int i=0; i < _size; i++)
+		for (size_t i=0; i < _size; i++)
 			_data[i] = temp[i];
 		_capacity = n;
 	}
@@ -138,7 +146,7 @@ private:
    T*            _data;
    size_t        _size;       // number of valid elements
    size_t        _capacity;   // max number of elements
-   mutable bool  _isSorted;   // (optionally) to indicate the array is sorted
+//   mutable bool  _isSorted;   // (optionally) to indicate the array is sorted
 
    // [OPTIONAL TODO] Helper functions; called by public member functions
 };
