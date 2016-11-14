@@ -37,30 +37,33 @@ public:
       // TODO: implement these overloaded operators
       const T& operator * () const { return (*_node); }
       T& operator * () { return (*_node); }
-      iterator& operator ++ () { ++_node; return (*this); }  //++a
+      iterator& operator ++ () { ++_node; return (*this); }
       iterator operator ++ (int) {
-		iterator temp = *this;
-		++_node;
-		return temp;
-	  }
+			iterator temp = *this;
+			++_node;
+			return temp;
+		}
       iterator& operator -- () { --_node; return (*this); }
       iterator operator -- (int) {
-		iterator temp = *this;
-		--_node;
-		return temp;
-	  }
+			iterator temp = *this;
+			--_node;
+			return temp;
+		}
 
       iterator operator + (int i) const {
-		iterator temp = *this;
-		temp = temp + i;
-		return temp;
-	  }
-      iterator& operator += (int i) { return (*this); }
+			iterator temp = *this;
+			temp += i;
+			return temp;
+		}
+      iterator& operator += (int i) {
+			_node += i;
+			return (*this);
+		}
 
-      iterator& operator = (const iterator& i) { return (*this); }
+      iterator& operator = (const iterator& i) { _node = i._node; return (*this); }
 
-      bool operator != (const iterator& i) const { return false; }
-      bool operator == (const iterator& i) const { return false; }
+      bool operator != (const iterator& i) const { return (_node != i._node); }
+      bool operator == (const iterator& i) const { return (_node == i._node); }
 
    private:
       T*    _node;
