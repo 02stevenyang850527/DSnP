@@ -70,20 +70,53 @@ public:
    };
 
    // TODO: implement these functions
-   iterator begin() const { return 0; }
-   iterator end() const { return 0; }
-   bool empty() const { return false; }
-   size_t size() const { return 0; }
+   iterator begin() const { return iterator(_data); }
+   iterator end() const { return iterator(_data + _size); }
+   bool empty() const { return (_size == 0); }
+   size_t size() const { return _size; }
 
-   T& operator [] (size_t i) { return _data[0]; }
-   const T& operator [] (size_t i) const { return _data[0]; }
+   T& operator [] (size_t i) { return _data[i]; }
+   const T& operator [] (size_t i) const { return _data[i]; }
 
-   void push_back(const T& x) { }
-   void pop_front() { }
-   void pop_back() { }
+   void push_back(const T& x) 
+	{
+		if (_size == _capacity){
+			if (_size == 0)
+				resize(1);
+			else
+				resize(2*_size);
+		}
+		_data[++_size] = x;
+	}
 
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
+   void pop_front() {
+		if (_size == 0) return;
+
+		if (_size >= 2)
+			_data[0] = _data[_size-1];
+		
+		--_size;     // if _size == 1, only do so
+	}
+
+   void pop_back() {
+		if (_size == 0) return;
+
+		--_size;
+	}
+
+   bool erase(iterator pos) { 
+		if (_size == 0)	return false;
+		*pos = *(end());
+		--_size;
+		return true;
+	}
+   bool erase(const T& x) { 
+		if (_size == 0)	return false;
+		for (size_t i = 0 ; i < _size; i++){
+			if (_data[i] == x)
+				
+		}
+	}
 
    void clear() { }
 
@@ -92,7 +125,14 @@ public:
 
    // Nice to have, but not required in this homework...
    // void reserve(size_t n) { ... }
-   // void resize(size_t n) { ... }
+   void resize(size_t n) {
+		if (n < _size) return;
+		T* temp = _data;
+		_data = new T[n];
+		for (int i=0; i < _size; i++)
+			_data[i] = temp[i];
+		_capacity = n;
+	}
 
 private:
    T*            _data;
