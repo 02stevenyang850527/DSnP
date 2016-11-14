@@ -60,14 +60,14 @@ public:
       iterator& operator ++ () { _node = _node->_next;	return *(this); }
 
       iterator operator ++ (int) {
-		iterator temp = *(this);
+		iterator temp(_node);
 		_node = _node->_next;
 		return temp;
 	  }
       iterator& operator -- () { _node = _node->_prev;	return *(this); }
 
       iterator operator -- (int){
-		 iterator temp = *(this);
+		 iterator temp(_node);
 		 _node = _node->_prev;
 		 return temp; 
 	  }
@@ -128,7 +128,7 @@ public:
    bool erase(const T& x) {
 	 for (iterator i = begin(); i != end() ; ++i){
 		 if (*i == x )
-		 {	 erase(i); return true;}			
+		 {	 erase(i); return true; }
 	 }	
 	 return false; 
    }
@@ -149,8 +149,31 @@ public:
 private:
    DListNode<T>*  _head;     // = dummy node if list is empty
    mutable bool   _isSorted; // (optionally) to indicate the array is sorted
+   void insertion_sort() const{
+	for (iterator i = begin(); i != end(); ){
+		for (iterator j = i; ; --j){
+			if (*j < *i || j == end()){
+				DListNode<T>* temp = i._node;
+				temp->_prev->_next = temp->_next;
+				temp->_next->_prev = temp->_prev;
+				insert(i++,j++);
+				break;
+			}
+		}
+	}
+   }
 
-   // [OPTIONAL TODO] helper functions; called by public member functions
+   void insert(const iterator a, const iterator b){ //insert b before a
+		if (a == b) return;
+		DListNode<T>* i = a._node;
+		DListNode<T>* j = b._node;
+		i->_prev = j->_prev;
+		i->_next = j;
+		i->_prev->_next = i;
+		i->_next->_prev = i;
+   }
+   
+// [OPTIONAL TODO] helper functions; called by public member functions
 };
 
 #endif // DLIST_H
