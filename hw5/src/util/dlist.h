@@ -55,7 +55,7 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { return _node->data; }
+      const T& operator * () const { return _node->_data; }
       T& operator * () { return _node->_data; }
       iterator& operator ++ () { _node = _node->_next;	return *(this); }
 
@@ -115,35 +115,37 @@ public:
 
    // return false if nothing to erase
    bool erase(iterator pos) {
-	if (pos == end())
-		return false;
-	else{
-		DListNode<T>* temp = pos._node;
-		temp->_prev->_next = temp->_next;
-		temp->_next->_prev = temp->_prev;
-		delete pos._node;
-		return true;
-	}
+		if (pos == end())
+			return false;
+		else{
+			DListNode<T>* temp = pos._node;
+			temp->_prev->_next = temp->_next;
+			temp->_next->_prev = temp->_prev;
+			delete pos._node;
+			return true;
+		}
    }
+
    bool erase(const T& x) {
-	 for (iterator i = begin(); i != end() ; ++i){
-		 if (*i == x )
-		 {	 erase(i); return true; }
-	 }	
-	 return false; 
+		for (iterator i = begin(); i != end() ; ++i){
+			if (*i == x )
+				{	 erase(i); return true; }
+		}	
+		return false; 
    }
 
    void clear() {   // delete all nodes except for the dummy node
-	if (!empty()){
-		DListNode<T>* temp = _head->_next->_next;
-		while(1){
-			delete temp->_prev;
-			if (temp == _head) break;
-			temp = temp->_next;
+		if (!empty()){
+			DListNode<T>* temp = _head->_next->_next;
+			while(1){
+				delete temp->_prev;
+				if (temp == _head) break;
+				temp = temp->_next;
+			}
+			_head->_next = _head->_prev = _head;
 		}
-		_head->_next = _head->_prev = _head;
-	}
    }
+
    void sort() const { insertion_sort();}
 
 private:
@@ -151,36 +153,34 @@ private:
    mutable bool   _isSorted; // (optionally) to indicate the array is sorted
 
    void insertion_sort() const{
-	/*for (iterator i = begin(); i != end(); ){
-			for (iterator j = i; ; --j){
-				if (*j < *i || j == end()){
-					DListNode<T>* temp = i._node;
-					temp->_prev->_next = temp->_next;
-					temp->_next->_prev = temp->_prev;
-					insert(i++,j++);
-					break;
-				}
-			}
-	}*/
-		for (iterator i = ++begin(); i != end(); i++){
-			iterator temp = i;
-			for (iterator j = --i; j != begin() && *temp < *j; j--){
-					insert(++j,--j);
-			insert(++j,temp);
-			--j;
-			}
-  		}	 
+		for (iterator i = ++begin(); i != end(); ++i){
+			T temp = i._node->_data;
+			iterator j = i;
+			for ( ; j != begin() && temp < j._node->_prev->_data; j--)
+				j._node->_data = j._node->_prev->_data;
+			j._node->_data = temp;
+  		}
 	}
 
    void insert(const iterator a, const iterator b) const{ //insert b before a
 		if (a == b) return;
-		DListNode<T>* i = a._node;
-		DListNode<T>* j = b._node;
-		i->_prev = j->_prev;
-		i->_next = j;
-		i->_prev->_next = i;
-		i->_next->_prev = i;
+		DListNode<T>* i = (a._node)->_prev;
+		DListNode<T>* j = (b._node)->_next;
+		i->_next = b._node;
+		b._node->_next = a._node;
+		a._node->_next = j;
+		j->_prev = a._node;
+		a._node->_prev = b._node;
+		b._node->_prev = i;
    }
+	
+	void swap(const iterator i, const iterator j) const{
+		DListNode<T>* a = i._node;
+		DListNode<T>* b = j._node;
+		T* temp = a->_data;
+		b->_data = a->_data;
+		a->_data = temp;
+	}
    
 // [OPTIONAL TODO] helper functions; called by public member functions
 };

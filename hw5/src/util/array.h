@@ -133,13 +133,15 @@ public:
 
    // Nice to have, but not required in this homework...
    // void reserve(size_t n) { ... }
-   void resize(size_t n) {
+
+   void resize(size_t n) {  // only suitable for push_back
 		if (n < _size) return;
 		T* temp = _data;
 		_data = new T[n];
 		for (size_t i=0; i < _size; i++)
 			_data[i] = temp[i];
 		_capacity = n;
+		delete []temp;
 	}
 
 private:
