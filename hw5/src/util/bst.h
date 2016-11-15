@@ -28,7 +28,7 @@ class BSTreeNode
 	friend class BSTree<T>::iterator;
 	
 	BSTreeNode(const T& d,BSTreeNode<T>* p = 0 , BSTreeNode<T>* l = 0, BSTreeNode<T>* r = 0):
-		_data(d), _left(l), _right(r) {}
+		_data(d), _parent(p), _left(l), _right(r) {}
 	
 	T					_data;
 	BSTreeNode<T>*	_parent;
@@ -45,7 +45,7 @@ public:
 
 	BSTree(){
 		_root = new BSTreeNode<T>(T());
-		_root->_left = _root->_right = _root; // _root is a dummy node
+		_root->_left = _root->_right = 0; // _root is a dummy node
 	}
 	~BSTree() { clear(); delete _root; }
 
@@ -61,75 +61,64 @@ public:
 		const T& operator * () const { return _node->_data; }
 		T& operator * () { return _node->_data; }
 
-		iterator& operator ++ () { 
+		iterator& operator ++ () {
+			if (_node == end()) return;
+
 			if (_node->_right != 0){
-				_node = _node->_right;
-				return *(this);
+				BSTreeNode<T>* temp = _node->_right;
+				while (temp->_left != 0){
+					temp = temp->_left;
+				}
+				_node = temp;
+				return *this;
 			}
 			else{
 				BSTreeNode<T>* temp = _node->_parent;
-				if (temp->_left == _node){
+				if (_node->_left == _node){
 					_node = _node->_parent;
-					return *(this);
+					return *this;
 				}
 				else{
-					++temp;
-					_node = temp;
-					return *(this);
+					_node = (++temp);
+					return *this;
 				}
 			}
 		}
 
 		iterator operator ++ (int) {
-			iterator tmp = *this;
-
-			if (_node->_right != 0)
-				_node = _node->_right;
-			else{
-				BSTreeNode<T>* temp = _node->_parent;
-				if (temp->_left == _node)
-					_node = _node->_parent;
-				else{
-					++temp;
-					_node = temp;
-				}
-			}
-			return tmp;
+			iterator temp = *this;
+			++(*this);
+			return temp;
 		 }
 
 		iterator& operator -- () {
+			if (_node == begin()) return;
+
 			if (_node->_left != 0){
-				_node = _node->_left;
-				return *(this);
+				BSTreeNode<T>* temp = _node->_left;
+				while (temp->_right != 0){
+					temp = temp->_right;
+				}
+				_node = temp;
+				return *this;
 			}
 			else{
 				BSTreeNode<T>* temp = _node->_parent;
 				if (_node->_right == _node){
 					_node = _node->_parent;
-					return *(this);
+					return *this;
 				}
 				else{
-					--temp;
-					_node = temp;
-					return *(this);
+					_node = (--temp);
+					return *this;
 				}
 			}
 		}
 
 		iterator operator -- (int) {
-			iterator tmp = *this;
-			if (_node->_left != 0)
-				_node = _node->_left;
-			else{
-				BSTreeNode<T>* temp = _node->_parent;
-				if (_node->_right == _node)
-					_node = _node->_parent;
-				else{
-					--temp;
-					_node = temp;
-				}
-			}
-			return tmp;
+			iterator temp = *this;
+			--(*this);
+			return temp;
 		}
 
 		iterator& operator = (const iterator& i) { _node = i._node; return *(this); }
@@ -141,14 +130,28 @@ public:
 	};
 
 	iterator begin() const {
-		BSTreeNode<T>* temp = _root->_left;
-		while ( temp->_left == 0){
+		BSTreeNode<T>* temp = _root;
+		while ( temp->_left != 0){
 			temp = temp->_left;
 		}
 		return iterator(temp);
-	} //TODO
-	iterator end() const { return 0; }   //TODO
-	bool empty() const { return false; }
+	}
+
+	iterator end() const { 
+		BSTreeNode<T>* temp = _root;
+		while ( temp->_right != 0){
+			temp = temp->_right;
+		}
+		return iterator(temp);
+	}
+
+	bool empty() const {
+		if (_root->_right == 0 && _root->_left == 0)
+			return true;
+		else
+			return false;
+	}
+
 	size_t size() const { return 0; }
 	
 	void push_back(const T&x) {}
@@ -160,8 +163,8 @@ public:
 	bool erase(const T& x) { return false; }
 	void clear() {}
 
-	void print() {}
-	void sort() {}
+	void print() {}    //no need to implement
+	void sort() {}		 //no need to implement
 
 private:
 	BSTreeNode<T>* _root;
