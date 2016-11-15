@@ -62,7 +62,7 @@ public:
 		T& operator * () { return _node->_data; }
 
 		iterator& operator ++ () {
-			if (_node == end()) return;
+	//		if (_node == end()) return;
 
 			if (_node->_right != 0){
 				BSTreeNode<T>* temp = _node->_right;
@@ -92,7 +92,7 @@ public:
 		 }
 
 		iterator& operator -- () {
-			if (_node == begin()) return;
+	//		if (_node == begin()) return;
 
 			if (_node->_left != 0){
 				BSTreeNode<T>* temp = _node->_left;
@@ -152,7 +152,13 @@ public:
 			return false;
 	}
 
-	size_t size() const { return 0; }
+	size_t size() const { 
+		size_t count = 0;
+		for (iterator i = begin(); i != end(); ++i)
+			count++;
+
+		return count;
+	}
 	
 	void push_back(const T&x) {}
 	void pop_front() {}
