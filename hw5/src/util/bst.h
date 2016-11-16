@@ -72,12 +72,12 @@ public:
 			}
 			else{
 				BSTreeNode<T>* temp = _node->_parent;
-				if (_node->_left == _node){
-					_node = _node->_parent;
+				if (temp->_left == _node){
+					_node = temp;
 					return *this;
 				}
 				else{
-					_node = (++temp);
+					_node = temp->_parent;
 					return *this;
 				}
 			}
@@ -100,12 +100,12 @@ public:
 			}
 			else{
 				BSTreeNode<T>* temp = _node->_parent;
-				if (_node->_right == _node){
-					_node = _node->_parent;
+				if (temp->_right == _node){
+					_node = temp;
 					return *this;
 				}
 				else{
-					_node = (--temp);
+					_node = temp->_parent;
 					return *this;
 				}
 			}
@@ -126,6 +126,8 @@ public:
 	};
 
 	iterator begin() const {
+		if (empty()) return 0;
+
 		BSTreeNode<T>* temp = _root;
 		while ( temp->_left != 0){
 			temp = temp->_left;
@@ -134,11 +136,13 @@ public:
 	}
 
 	iterator end() const { 
+		if (empty()) return 0;
+
 		BSTreeNode<T>* temp = _root;
 		while ( temp->_right != 0){
 			temp = temp->_right;
 		}
-		return iterator(temp);
+		return ++iterator(temp);
 	}
 
 	bool empty() const {
@@ -150,6 +154,8 @@ public:
 
 	size_t size() const {
 		size_t count = 0;
+		if (empty())
+			return count;
 		for (iterator i = begin(); i != end(); ++i)
 			count++;
 
@@ -168,10 +174,41 @@ public:
 		erase(end());
 	}
 
-	void insert(const T& x){}
+	void insert(const T& x){
+		if (empty()){
+			BSTreeNode<T>* n = new BSTreeNode<T>(x, _root, 0, 0);
+			_root->_left = n;
+			_root->_right = n;
+		}
+		else{
+			BSTreeNode<T>* temp = _root->_left;
+			while (1){
+				if (x > temp->_data){
+					if ( temp->_right != 0)
+						temp = temp->_right;
+					else{
+						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
+						temp->_right = n;
+						cout << size() << endl;
+						break;
+					}
+				}
+				else{
+					if ( temp->_left != 0)
+						temp = temp->_left;
+					else{
+						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
+						temp->_left = n;
+						cout << size() << endl;
+						break;
+					}
+				}
+			} //end the loop
+		}
+	}      //TODO
 	
-	bool erase(iterator pos) { return false; }
-	bool erase(const T& x) { return false; }
+	bool erase(iterator pos) { return false; } //TODO
+	bool erase(const T& x) { return false; }   //TODO
 	void clear() {}
 
 	void print() {}    //no need to implement
@@ -179,6 +216,7 @@ public:
 
 private:
 	BSTreeNode<T>* _root;
+
 
 };
 
