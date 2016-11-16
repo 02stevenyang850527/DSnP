@@ -29,7 +29,7 @@ class BSTreeNode
 	
 	BSTreeNode(const T& d,BSTreeNode<T>* p = 0 , BSTreeNode<T>* l = 0, BSTreeNode<T>* r = 0):
 		_data(d), _parent(p), _left(l), _right(r) {}
-	
+
 	T					_data;
 	BSTreeNode<T>*	_parent;
 	BSTreeNode<T>*	_left;
@@ -46,6 +46,7 @@ public:
 	BSTree(){
 		_root = new BSTreeNode<T>(T());
 		_root->_left = _root->_right = _root->_parent = 0; // _root is a dummy node
+		_size = 0;
 	}
 	~BSTree() { clear(); delete _root; }
 
@@ -77,7 +78,7 @@ public:
 					return *this;
 				}
 				else{
-					_node = temp->_parent;
+					_node = (++iterator(temp))._node;
 					return *this;
 				}
 			}
@@ -128,7 +129,7 @@ public:
 	iterator begin() const {
 		if (empty()) return 0;
 
-		BSTreeNode<T>* temp = _root;
+		BSTreeNode<T>* temp = _root->_parent;
 		while ( temp->_left != 0){
 			temp = temp->_left;
 		}
@@ -138,11 +139,12 @@ public:
 	iterator end() const { 
 		if (empty()) return 0;
 
-		BSTreeNode<T>* temp = _root;
+	/*	BSTreeNode<T>* temp = _root;
 		while ( temp->_right != 0){
 			temp = temp->_right;
 		}
-		return ++iterator(temp);
+		return ++iterator(temp);*/
+		return iterator(_root);
 	}
 
 	bool empty() const {
@@ -153,13 +155,13 @@ public:
 	}
 
 	size_t size() const {
-		size_t count = 0;
+		/*size_t count = 0;
 		if (empty())
 			return count;
 		for (iterator i = begin(); i != end(); ++i)
-			count++;
+			count++;*/
 
-		return count;
+		return _size;
 	}
 	
 	void pop_front() {
@@ -175,21 +177,28 @@ public:
 	}
 
 	void insert(const T& x){
+		cerr << "insert: "<< x << endl;
 		if (empty()){
-			BSTreeNode<T>* n = new BSTreeNode<T>(x, _root, 0, 0);
-			_root->_left = n;
-			_root->_right = n;
+			BSTreeNode<T>* n = new BSTreeNode<T>(x, 0, 0, _root);
+			_root->_parent = n;   // special case, only for initialization
 		}
 		else{
-			BSTreeNode<T>* temp = _root->_left;
+			BSTreeNode<T>* temp = _root->_parent;
 			while (1){
 				if (x > temp->_data){
-					if ( temp->_right != 0)
-						temp = temp->_right;
+					if ( temp->_right != 0){
+						if ( temp->_right != _root)
+							temp = temp->_right;
+						else{
+							BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, _root);
+							temp->_right = n;
+							break;
+						}
+					}
 					else{
 						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
 						temp->_right = n;
-						cout << size() << endl;
+						// cout << size() << endl;
 						break;
 					}
 				}
@@ -199,24 +208,26 @@ public:
 					else{
 						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
 						temp->_left = n;
-						cout << size() << endl;
+						// cout << size() << endl;
 						break;
 					}
 				}
 			} //end the loop
 		}
+		_size++;
+		cerr << "insert done!" << endl;
 	}      //TODO
 	
 	bool erase(iterator pos) { return false; } //TODO
 	bool erase(const T& x) { return false; }   //TODO
 	void clear() {}
 
-	void print() {}    //no need to implement
+	void print() {}    //TODO
 	void sort() {}		 //no need to implement
 
 private:
 	BSTreeNode<T>* _root;
-
+	size_t 			_size;
 
 };
 
