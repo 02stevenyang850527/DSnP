@@ -78,7 +78,11 @@ public:
 					return *this;
 				}
 				else{
-					_node = (++iterator(temp))._node;
+					while (temp->_parent->_left != temp){
+							temp = temp->_parent;
+					}
+					temp = temp->_parent;
+					_node = temp;
 					return *this;
 				}
 			}
@@ -106,7 +110,10 @@ public:
 					return *this;
 				}
 				else{
-					_node = temp->_parent;
+					while (temp->_parent->_right != temp){
+						temp = temp->_parent;
+					}
+					_node = temp;
 					return *this;
 				}
 			}
@@ -139,11 +146,6 @@ public:
 	iterator end() const { 
 		if (empty()) return 0;
 
-	/*	BSTreeNode<T>* temp = _root;
-		while ( temp->_right != 0){
-			temp = temp->_right;
-		}
-		return ++iterator(temp);*/
 		return iterator(_root);
 	}
 
@@ -155,12 +157,6 @@ public:
 	}
 
 	size_t size() const {
-		/*size_t count = 0;
-		if (empty())
-			return count;
-		for (iterator i = begin(); i != end(); ++i)
-			count++;*/
-
 		return _size;
 	}
 	
@@ -177,7 +173,6 @@ public:
 	}
 
 	void insert(const T& x){
-		cerr << "insert: "<< x << endl;
 		if (empty()){
 			BSTreeNode<T>* n = new BSTreeNode<T>(x, 0, 0, _root);
 			_root->_parent = n;   // special case, only for initialization
@@ -198,7 +193,6 @@ public:
 					else{
 						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
 						temp->_right = n;
-						// cout << size() << endl;
 						break;
 					}
 				}
@@ -208,15 +202,13 @@ public:
 					else{
 						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
 						temp->_left = n;
-						// cout << size() << endl;
 						break;
 					}
 				}
 			} //end the loop
 		}
 		_size++;
-		cerr << "insert done!" << endl;
-	}      //TODO
+	}
 	
 	bool erase(iterator pos) { return false; } //TODO
 	bool erase(const T& x) { return false; }   //TODO
