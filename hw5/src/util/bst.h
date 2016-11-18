@@ -209,14 +209,28 @@ public:
 				}
 			} //end the loop
 		}
+		cout << "insert done: " << x << endl;
 		_size++;
 	}
 	
 	bool erase(iterator pos) {
 			if (empty())
 				return false;
+			
+			if (pos._node->_left == 0){
+				if (pos._node->_right == 0){
+					if (pos._node->_parent->_left = pos._node)
+						pos._node->_parent->_left = 0;
+					else
+						pos._node->_parent->_right = 0;
+				}
+				else{
+					if (pos._node->_parent->_left = pos._node)
+						pos._node->_parent->_left = pos._node->_left;
+				}	
+			}
 
-			if (pos._node->_left == 0 || pos._node->_right == 0){
+/*			if (pos._node->_left == 0 || pos._node->_right == 0){
 						
 					if (pos._node->_right != 0){
 						if (pos._node->_parent == 0){
@@ -242,24 +256,33 @@ public:
 					}
 				delete pos._node;
 			}
-		/*	else{
+			else{
 				BSTreeNode<T>* temp = pos._node->_right;
 				while (temp->_left != 0)
 					temp = temp->_left;
-				if (pos._node->_parent->_left == pos._node)
-					pos._node->_parent->_left = temp->_left;
-				else
-					pos._node->_parent->_right = temp->_left;
+				if (temp == _root){
+					pos._node->_left->_parent = 0;
+					pos._node->_left->_right = _root;
+					_root->_parent = pos._node->_left;
+				}	
+				else{
+					if (pos._node->_parent->_left == pos._node)
+						pos._node->_parent->_left = temp->_left;
+					else
+						pos._node->_parent->_right = temp->_left;
 
-				temp->_left->_left = pos._node->_left;
-				temp->_left->_right = pos._node->_right;
+					temp->_left->_left = pos._node->_left;
+					temp->_left->_right = pos._node->_right;
+					temp->_left->_parent = pos._node->_parent;
+					temp->_left = 0;
+				}
 				delete pos._node;
-			} */
+			}
 		--_size;
 		if (_size == 0){
 			_root->_start = 0;
 			_root->_parent = 0;
-		}
+		}*/
 		
 		return true;
 } //TODO
