@@ -27,13 +27,14 @@ class BSTreeNode
 	friend class BSTree<T>;
 	friend class BSTree<T>::iterator;
 	
-	BSTreeNode(const T& d,BSTreeNode<T>* p = 0 , BSTreeNode<T>* l = 0, BSTreeNode<T>* r = 0):
-		_data(d), _parent(p), _left(l), _right(r) {}
+	BSTreeNode(const T& d,BSTreeNode<T>* p = 0 , BSTreeNode<T>* l = 0, BSTreeNode<T>* r = 0, BSTreeNode<T>* s = 0):
+		_data(d), _parent(p), _left(l), _right(r), _start(s) {}
 
 	T					_data;
 	BSTreeNode<T>*	_parent;
 	BSTreeNode<T>*	_left;
 	BSTreeNode<T>*	_right;
+	BSTreeNode<T>* _start;    //only for _root
 };
 
 
@@ -45,7 +46,7 @@ public:
 
 	BSTree(){
 		_root = new BSTreeNode<T>(T());
-		_root->_left = _root->_right = _root->_parent = 0; // _root is a dummy node
+		_root->_left = _root->_right = _root->_parent = _root->_start = 0; // _root is a dummy node
 		_size = 0;
 	}
 	~BSTree() { clear(); delete _root; }
@@ -79,7 +80,9 @@ public:
 				}
 				else{
 					while (temp->_parent->_left != temp){
-							temp = temp->_parent;
+				//		if (temp->_parent->_left == 0)
+				//			break;					// for the case: ++end()
+						temp = temp->_parent;
 					}
 					temp = temp->_parent;
 					_node = temp;
@@ -136,7 +139,7 @@ public:
 	iterator begin() const {
 		if (empty()) return 0;
 
-		BSTreeNode<T>* temp = _root->_parent;
+		BSTreeNode<T>* temp = _root->_start;
 		while ( temp->_left != 0){
 			temp = temp->_left;
 		}
@@ -150,10 +153,7 @@ public:
 	}
 
 	bool empty() const {
-		if ( (_root->_right == 0 && _root->_left == 0) && _root->_parent == 0)
-			return true;
-		else
-			return false;
+		return (_size == 0);
 	}
 
 	size_t size() const {
@@ -169,29 +169,31 @@ public:
 	void pop_back() {
 		if (empty())
 			return;
-		erase(end());
+		erase(--end());
 	}
 
 	void insert(const T& x){
 		if (empty()){
-			BSTreeNode<T>* n = new BSTreeNode<T>(x, 0, 0, _root);
-			_root->_parent = n;   // special case, only for initialization
+			BSTreeNode<T>* n = new BSTreeNode<T>(x, 0, 0, _root, 0);
+			_root->_parent = n;
+			_root->_start = n;   // special case, only for initialization
 		}
 		else{
-			BSTreeNode<T>* temp = _root->_parent;
+			BSTreeNode<T>* temp = _root->_start;
 			while (1){
 				if (x > temp->_data){
 					if ( temp->_right != 0){
 						if ( temp->_right != _root)
 							temp = temp->_right;
 						else{
-							BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, _root);
+							BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, _root, 0);
 							temp->_right = n;
+							_root->_parent = n;
 							break;
 						}
 					}
 					else{
-						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
+						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0, 0);
 						temp->_right = n;
 						break;
 					}
@@ -200,7 +202,7 @@ public:
 					if ( temp->_left != 0)
 						temp = temp->_left;
 					else{
-						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0);
+						BSTreeNode<T>* n = new BSTreeNode<T>(x, temp, 0, 0, 0);
 						temp->_left = n;
 						break;
 					}
@@ -210,9 +212,62 @@ public:
 		_size++;
 	}
 	
-	bool erase(iterator pos) { return false; } //TODO
+	bool erase(iterator pos) {
+			if (empty())
+				return false;
+
+			if (pos._node->_left == 0 || pos._node->_right == 0){
+						
+					if (pos._node->_right != 0){
+						if (pos._node->_parent == 0){
+							_root->_start = pos._node->_right;
+							pos._node->_right->_parent = 0;
+						}
+						else{
+							pos._node->_parent->_right = pos._node->_right;
+							if (pos._node->_right != 0)
+								pos._node->_right->_parent = pos._node->_parent;
+						}
+					}
+					else{
+						if (pos._node->_parent == 0){
+							_root->_start = pos._node->_left;
+							pos._node->_left->_parent = 0;
+						}
+						else{
+							pos._node->_parent->_left = pos._node->_left;
+							if (pos._node->_left != 0)
+								pos._node->_left->_parent = pos._node->_parent;
+						}
+					}
+				delete pos._node;
+			}
+		/*	else{
+				BSTreeNode<T>* temp = pos._node->_right;
+				while (temp->_left != 0)
+					temp = temp->_left;
+				if (pos._node->_parent->_left == pos._node)
+					pos._node->_parent->_left = temp->_left;
+				else
+					pos._node->_parent->_right = temp->_left;
+
+				temp->_left->_left = pos._node->_left;
+				temp->_left->_right = pos._node->_right;
+				delete pos._node;
+			} */
+		--_size;
+		if (_size == 0){
+			_root->_start = 0;
+			_root->_parent = 0;
+		}
+		
+		return true;
+} //TODO
 	bool erase(const T& x) { return false; }   //TODO
-	void clear() {}
+	void clear() {
+		while (_size != 0)
+			erase(begin());
+	}
 
 	void print() {}    //TODO
 	void sort() {}		 //no need to implement
