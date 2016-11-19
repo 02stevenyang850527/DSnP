@@ -176,6 +176,11 @@ public:
 	}
 
 	void pop_back() {
+/*		iterator temp = end();
+		--temp;
+		cout << "begin(): " << *begin() << endl;
+		cout << "end(): " << *temp << endl;
+		cout << "size is " << _size << endl;*/
 		if (empty())
 			return;
 		erase(--end());
@@ -217,13 +222,11 @@ public:
 				}
 			} //end the loop
 		}
-	//	cout << "insert done: " << x << endl;
 		_size++;
 	}
 	
 	bool erase(iterator pos) {
 			if (empty()) return false;
-		//	cout << "size is " << _size << endl;
 			if (_size == 1){
 				dummy->_parent = 0;
 				--_size;
@@ -256,7 +259,10 @@ public:
 					pos._node->_left->_parent = pos._node->_parent;
 			}
 			else{
-				temp._node->_parent->_left = 0;
+				temp._node->_parent->_left = temp._node->_right;
+				if (temp._node->_right != 0)
+					temp._node->_right->_parent = temp._node->_parent;
+
 				temp._node->_parent = pos._node->_parent;
 				if (pos._node->_parent->_left == pos._node)
 					pos._node->_parent->_left = temp._node;
@@ -274,13 +280,29 @@ public:
 		delete pos._node;
 		--_size;
 
-	//	cout << "size is " << _size << endl;
 		return true;
-	} //TODO
-	bool erase(const T& x) { return false; }   //TODO
+	}
+
+	bool erase(const T& x) {
+		iterator i = begin();
+		for ( ; i != end(); ++i){
+			if (*i == x){
+				erase(i);
+				return true; 
+				break;
+			}
+		}
+//		if (*i == x){   //for the case i = begin()
+//			erase(i);
+//			return true;
+//		}
+
+		return false;
+	}
+
 	void clear() {
 		while (_size != 0)
-			erase(begin());
+			erase(--end());
 	}
 
 	void print() {}    //TODO
