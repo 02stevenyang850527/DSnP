@@ -115,17 +115,12 @@ public:
 					return *this;
 				}
 				else{
-				//	cout << "QAQQ\n";
 					if (temp->_parent == 0)
 						return *this;
 					while (temp->_parent->_right != temp){
-					//	cout << "Orz\n";
 						temp = temp->_parent;
-						if (temp->_parent == 0){
-						//	cout << "haha\n";
+						if (temp->_parent == 0)
 							return *this;
-							break;
-						}
 					}
 					temp = temp->_parent;	
 					_node = temp;
@@ -301,7 +296,6 @@ public:
 			if (*i == x){
 				erase(i);
 				return true; 
-				break;
 			}
 		}
 		return false;
@@ -312,7 +306,7 @@ public:
 			erase(--end());
 	}
 
-	void print() {}    //TODO
+	void print() {}    //no need to implement
 	void sort() {}		 //no need to implement
 
 private:
