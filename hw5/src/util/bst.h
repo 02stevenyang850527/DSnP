@@ -45,10 +45,12 @@ public:
 
 	BSTree(){
 		dummy = new BSTreeNode<T>(T());
-		dummy->_left = dummy->_right = dummy->_parent = 0; // _root is a dummy node
+		dummy->_left = dummy->_right = dummy->_parent = 0;
+		_root = new BSTreeNode<T>(T());
+		_root->_left = _root->_right = _root->_parent = 0;
 		_size = 0;
 	}
-	~BSTree() { clear(); delete dummy; }
+	~BSTree() { clear(); delete dummy; delete _root;}
 
    class iterator 
 	{
@@ -79,8 +81,6 @@ public:
 				}
 				else{
 					while (temp->_parent->_left != temp){
-				//		if (temp->_parent->_left == 0)
-				//			break;					// for the case: ++end()
 						temp = temp->_parent;
 					}
 					temp = temp->_parent;
@@ -99,6 +99,7 @@ public:
 		iterator& operator -- () {
 			if (_node->_left != 0){
 				BSTreeNode<T>* temp = _node->_left;
+				
 				while (temp->_right != 0){
 					temp = temp->_right;
 				}
@@ -106,15 +107,27 @@ public:
 				return *this;
 			}
 			else{
+				if (_node->_parent == 0)
+					return *this;
 				BSTreeNode<T>* temp = _node->_parent;
 				if (temp->_right == _node){
 					_node = temp;
 					return *this;
 				}
 				else{
+				//	cout << "QAQQ\n";
+					if (temp->_parent == 0)
+						return *this;
 					while (temp->_parent->_right != temp){
+					//	cout << "Orz\n";
 						temp = temp->_parent;
+						if (temp->_parent == 0){
+						//	cout << "haha\n";
+							return *this;
+							break;
+						}
 					}
+					temp = temp->_parent;	
 					_node = temp;
 					return *this;
 				}
@@ -135,19 +148,10 @@ public:
 		BSTreeNode<T>* _node;
 	};
 	
-	iterator find_root() const {
-		if (empty()) return 0;
-		BSTreeNode<T>* _root = dummy;
-		while (_root->_parent != 0)
-			_root = _root->_parent;
-		
-		return iterator(_root);
-	}
-
 	iterator begin() const {
-		if (empty()) return 0;
+		if (empty()) return iterator(dummy);
 
-		BSTreeNode<T>* temp = find_root()._node;
+		BSTreeNode<T>* temp = _root;
 
 		while (temp->_left != 0){
 			temp = temp->_left;
@@ -156,8 +160,6 @@ public:
 	}
 
 	iterator end() const { 
-		if (empty()) return 0;
-
 		return iterator(dummy);
 	}
 
@@ -176,23 +178,18 @@ public:
 	}
 
 	void pop_back() {
-/*		iterator temp = end();
-		--temp;
-		cout << "begin(): " << *begin() << endl;
-		cout << "end(): " << *temp << endl;
-		cout << "size is " << _size << endl;*/
-		if (empty())
-			return;
+		if (empty())	return;
 		erase(--end());
 	}
 
 	void insert(const T& x){
 		if (empty()){
-			BSTreeNode<T>* n = new BSTreeNode<T>(x, 0, 0, dummy);
-			dummy->_parent = n;
+			_root->_data = x;
+			_root->_right = dummy;
+			dummy->_parent = _root;
 		}
 		else{
-			BSTreeNode<T>* temp = find_root()._node;
+			BSTreeNode<T>* temp = _root;
 			while (1){
 				if (x > temp->_data){
 					if ( temp->_right != 0){
@@ -229,11 +226,26 @@ public:
 			if (empty()) return false;
 			if (_size == 1){
 				dummy->_parent = 0;
+				_root->_right = 0;
 				--_size;
-				delete pos._node;
 				return true;
 			}
-			
+
+			if (pos._node == _root){
+				if ((++pos)._node != dummy){
+					_root->_data = *pos;
+					erase(pos);
+					return true;
+				}
+				else{
+					--pos;
+					--pos;
+					_root->_data = *pos;
+					erase(pos);
+					return true;
+				}
+			}
+
 			iterator temp = pos;
 			++temp;  // minimum iterator larger than pos
 			if (temp._node->_left == pos._node){
@@ -292,11 +304,6 @@ public:
 				break;
 			}
 		}
-//		if (*i == x){   //for the case i = begin()
-//			erase(i);
-//			return true;
-//		}
-
 		return false;
 	}
 
@@ -310,6 +317,7 @@ public:
 
 private:
 	BSTreeNode<T>* dummy;
+	BSTreeNode<T>* _root;
 	size_t 			_size;
 
 };
