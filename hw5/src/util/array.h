@@ -70,8 +70,18 @@ public:
    };
 
    // TODO: implement these functions
-   iterator begin() const { return iterator(_data); }
-   iterator end() const { return iterator(_data + _size); }
+   iterator begin() const { 
+		if (_capacity == 0)
+			return 0;
+		else
+			return iterator(_data); 
+	}
+   iterator end() const { 
+		if (_capacity == 0)
+			return 0;
+		else
+			return iterator(_data + _size); 
+	}
    bool empty() const { return (_size == 0); }
    size_t size() const { return _size; }
 
@@ -82,9 +92,9 @@ public:
 	{
 		if (_size == _capacity){
 			if (_size == 0)
-				resize(1);
+				expand(1);
 			else
-				resize(2*_size);
+				expand(2*_size);
 		}
 		_data[_size] = x;
 		_size++;
@@ -134,7 +144,7 @@ public:
    // Nice to have, but not required in this homework...
    // void reserve(size_t n) { ... }
 
-   void resize(size_t n) {  // only suitable for push_back
+   void expand(size_t n) {  // only suitable for push_back
 		if (n < _size) return;
 		T* temp = _data;
 		_data = new T[n];
