@@ -150,7 +150,7 @@ public:
 
 private:
    DListNode<T>*  _head;     // = dummy node if list is empty
-   mutable bool   _isSorted; // (optionally) to indicate the array is sorted
+  // mutable bool   _isSorted; // (optionally) to indicate the array is sorted
 
    void insertion_sort() const{
 		for (iterator i = ++begin(); i != end(); ++i){
@@ -162,7 +162,7 @@ private:
   		}
 	}
 
-   void insert(const iterator a, const iterator b) const{ //insert b before a
+/*   void insert(const iterator a, const iterator b) const{ //insert b before a
 		if (a == b) return;
 		DListNode<T>* i = (a._node)->_prev;
 		DListNode<T>* j = (b._node)->_next;
@@ -181,7 +181,7 @@ private:
 		b->_data = a->_data;
 		a->_data = temp;
 	}
-   
+  */ 
 // [OPTIONAL TODO] helper functions; called by public member functions
 };
 
