@@ -25,7 +25,7 @@ class CirGate;
 class CirGate
 {
 public:
-   CirGate() {}
+   CirGate() { _ref = 0; }
    virtual ~CirGate() {}
 
    // Basic access methods
@@ -44,23 +44,30 @@ private:
 	string _type, _symbol;
 	unsigned _line, _id, _ref;
 	static unsigned _globalRef;
-	GateList _in, _out;
+	GateList _fanin, _fanout;
+	vector<bool> in_inv, out_inv;
 	
 };
 
 class ConstGate: public CirGate()
 {
 public:
-	ConstGate():
-		_id(0), _line(0), _type("CONST"){}
+	ConstGate(){
+		_id = 0;
+		_line = 0;
+		_type = "CONST";
+	}
 	~ConstGate() {}
 };
 
 class UndefGate: public CirGate()
 {
 public:
-	UndefGate(unsigned i):
-		_id(i), _line(0), _type("UNDEF"){}
+	UndefGate(unsigned i){
+		_id = i;
+		_line = 0;
+		_type = "UNDEF";
+	}
 	~UndefGate() {}
 	Idlist getOut();
 };
@@ -68,37 +75,35 @@ public:
 class POGate: public CirGate()
 {
 public:
-	POGate(unsigned i, unsigned li):
-		_id(i), _line(li), _type("PO"){}
+	POGate(unsigned i, unsigned li){
+		_id = i;
+		_line =li;
+		_type = "PO";
+	}
 	~POGate() {}
 }
 
 class PIGate: public CirGate()
 {
 public:
-	PIGate(unsigned i, unsigned li):
-		_id(i), _line(li), _type("PI"){}
+	PIGate(unsigned i, unsigned li){
+		_id = i;
+		_line = li;
+		_type = "PI";
+	}
 	~PIGate() {}
 }
 
 class AIGGate: public CirGate()
 {
 public:
-	AIGGate(unsigned i, unsigned li):
-		_id(i), _line(li), _type("AIG")
+	AIGGate(unsigned i, unsigned li){
+		_id = i;
+		_line = li;
+		_type = "AIG";
+	}
 	~AigGate() {}
 };
 
-class AIGGateV: public CirGate()
-{
-	#define NEG 0x1
-	AigGateV(AigGate* g, size_t phase):
-		_gateV(size_t(g) + phase) {}
-	AigGate* gate() const {
-		return (AigGate*)(_gateV & ~size_t(NEG)); }
-	bool isInv() const { return (_gateV & NEG); }
-
-	size_t _gateV;
-};
 
 #endif // CIR_GATE_H_
