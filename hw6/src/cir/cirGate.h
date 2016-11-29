@@ -33,12 +33,19 @@ public:
    string getSymStr() const { return _symbol; }
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
+	bool isINV() const {return ;}
 
    // Printing functions
    virtual void printGate() const = 0;
    void reportGate() const;
    void reportFanin(int level) const;
    void reportFanout(int level) const;
+
+	// setting function
+	void set_inv(unsigned n, int t)
+	{
+		if (t == 1)
+	}
 
 private:
 	string _type, _symbol;

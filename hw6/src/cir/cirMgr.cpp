@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <cstdio>
 #include <ctype.h>
 #include <cassert>
@@ -158,9 +159,9 @@ CirMgr::readCircuit(const string& fileName)
 	}
 
 	string line, temp;
-	while (getline(data,line)){
-		istringstream s(line);
+	getline(data, line);
 
+		istringstream s(line);
 		while (s >> temp){
 			if (temp == "aag"){
 				s >> m >> i >> l >> o >> a;
@@ -168,12 +169,17 @@ CirMgr::readCircuit(const string& fileName)
 				return false;
 		}
 		++lineNo;
+		_idList.resize(m + o + 1, 0); //_idlist[i] get the Cirgate of _id == i
 
 		for (unsigned k = 0; k < i; ++k){
+			getline(data, line);
+			s(line);
 			unsigned xdd;
 			s >> xdd;
-			input.push_back(xdd);
 			++lineNo;
+			input.push_back(xdd);
+//			_gList.push_back(new PIGate(xdd/2, lineNo));
+			_idList[xdd/2] = new PIGate(xdd/2, lineNo);
 		}
 		
 		for (unsigned k = 0; k < l; ++k){    // should not enter the loop in hw6
@@ -182,24 +188,51 @@ CirMgr::readCircuit(const string& fileName)
 		}
 
 		for (unsigned k = 0; k < o; ++k){
+			getline(data, line);
+			s(line);
 			unsigned xdd;
 			s >> xdd;
-			output.push_back(xdd);
 			++lineNo;
+			output.push_back(xdd);
+//			_gList.push_back(new POGate(m + 1 + k, lineNo));
+			_idList[m+1+k] = new POGate(m+1+k, lineNo);
 		}
 		
+		_idList.resize(m + o, 0);
 		for (unsigned k = 0; k < a; ++k){
+			getline(data, line);
+			s(line);
 			unsigned x,y,z;
 			s >> x >> y >> z;
 			vector <unsigned> temp;
 			temp.push_back(x); temp.push_back(y); temp.push_back(z);
 			aig.push_back(temp);
 			++lineNo;
+//			_gList.push_back(new AIGGate(x/2, lineNo));
+			_idList[x/2] = new AIGGate(x/2, lineNo);
 		}
-	}
+		
 	data.close();
 	
    return true;
+}
+
+void
+CirMgr::linkAIG(vector <unsigned> aigInfo)
+{
+	CirMgr* temp = getGate(aigInfo[0]/2);
+	CirMgr* p1 = getGate(aigInfo[1]/2);
+	CirMgr* p2 = getGate(aigInfo[2]/2);
+	if (p1 == 0){
+		unsigned id1 = aigInfo[1]/2;
+		p1 = new UndefGate(id1);
+		_idList[id1] = p1;
+	}
+	if (p2 == 0){
+		unsigned id2 = aigInfo[2]/2;
+		p2 = new UndefGate(id2);
+		_idList[id2] = p2;
+	}
 }
 
 /**********************************************************/

@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 
 using namespace std;
@@ -24,12 +25,18 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr();
-   ~CirMgr() {}
+   CirMgr() { _idList.push_back(new ConstGate()); }
+   ~CirMgr() { delete []_idList; }
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.
-   CirGate* getGate(unsigned gid) const { return 0; }
+   CirGate* getGate(unsigned gid) const
+	{ 
+		if (gid > m + o)
+			return 0; 
+		else
+			return _idList[gid];
+	}
 
    // Member functions about circuit construction
    bool readCircuit(const string&);
@@ -43,13 +50,14 @@ public:
    void writeAag(ostream&) const;
 
 private:
-	GateList _idList;
+	GateList _gList, _idList;
 	unsigned m, i, l, o, a;
-	vector<unsigned> input;
+	vector <unsigned> input;
+	vector <unsigned> output;
 //	vector<unsigned> latch;  // not used in hw6
-	vector<unsigned> output;
 	vector< vector<unsigned> > aig;
-	
+	void linkAIG(vector<unsigned>);
+	void linkPO(unsigned);
 	
 };
 
