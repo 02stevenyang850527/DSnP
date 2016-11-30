@@ -52,10 +52,10 @@ public:
 private:
 	GateList _gList, _idList;
 	unsigned m, i, l, o, a;
-	vector <unsigned> input;
-	vector< vector<unsigned> > output;
+	IdList input;
+	vector<IdList> output;
 //	vector<unsigned> latch;  // not used in hw6
-	vector< vector<unsigned> > aig;
+	vector<IdList> aig;
 	void linkAIG( vector<unsigned> );
 	void linkPo( vector<unsigned> );
 };

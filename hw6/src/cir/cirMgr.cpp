@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 #include "cirMgr.h"
 #include "cirGate.h"
 #include "util.h"
@@ -176,9 +177,9 @@ CirMgr::readCircuit(const string& fileName)
 
 		for (unsigned k = 0; k < i; ++k){
 			getline(data, line);
-			s.str(line);
+			istringstream ss(line);
 			unsigned xdd;
-			s >> xdd;
+			ss >> xdd;
 			++lineNo;
 			input.push_back(xdd);
 //			_gList.push_back(new PIGate(xdd/2, lineNo));
@@ -192,9 +193,9 @@ CirMgr::readCircuit(const string& fileName)
 
 		for (unsigned k = 0; k < o; ++k){
 			getline(data, line);
-			s.str(line);
+			istringstream ss(line);
 			unsigned xdd;
-			s >> xdd;
+			ss >> xdd;
 			++lineNo;
 			vector <unsigned> temp;
 			temp.push_back(m+1+k); temp.push_back(xdd);
@@ -206,9 +207,9 @@ CirMgr::readCircuit(const string& fileName)
 		_idList.resize(m + o, 0);
 		for (unsigned k = 0; k < a; ++k){
 			getline(data, line);
-			s.str(line);
+			istringstream ss(line);
 			unsigned x,y,z;
-			s >> x >> y >> z;
+			ss >> x >> y >> z;
 			vector <unsigned> temp;
 			temp.push_back(x); temp.push_back(y); temp.push_back(z);
 			aig.push_back(temp);
@@ -221,9 +222,34 @@ CirMgr::readCircuit(const string& fileName)
 			linkAIG(aig[k]);
 		for (unsigned k = 0; k < o; ++k)
 			linkPo(output[k]);
-		
+
+	while (getline(data, line)){
+		if (line.empty())
+			break;
+		if (line[0] == 'c')
+			break;
+		string tok, sub;
+		size_t s = myStrGetTok(line, tok);
+		if (s == string::npos)
+			return false;
+		else
+			sub = line.substr(s+1);
+
+		if (tok[0] == 'i'){
+			tok.erase(tok.begin());
+			int num;
+			myStr2Int(tok, num);
+			getGate(input[num]/2)->setSymbol(sub);
+		}
+
+		if (tok[0] == 'o'){
+			tok.erase(tok.begin());
+			int num;
+			myStr2Int(tok, num);
+			getGate(output[num][0])->setSymbol(sub);
+		}
+	}
 	data.close();
-	
    return true;
 }
 
@@ -279,6 +305,14 @@ Circuit Statistics
 void
 CirMgr::printSummary() const
 {
+	cout << endl;
+	cout << "Circuit Statistics" << endl;
+	cout << "==================" << endl;
+	cout << "  " << setw(7) << left << "PI" << setw(7) << right << i << endl;
+	cout << "  " << setw(7) << left << "PO" << setw(7) << right << o << endl;
+	cout << "  " << setw(7) << left << "AIG" << setw(7) << right << a << endl;
+	cout << "------------------" << endl;
+	cout << "  " << setw(7) << left << "Total" << setw(7) << right << i+o+a  << endl;
 }
 
 void
@@ -290,6 +324,8 @@ void
 CirMgr::printPIs() const
 {
    cout << "PIs of the circuit:";
+	for (unsigned k = 0; k < i; k++)
+		cout << " " << input[k]/2;
    cout << endl;
 }
 
@@ -297,12 +333,64 @@ void
 CirMgr::printPOs() const
 {
    cout << "POs of the circuit:";
+	for (unsigned k = 0; k < o; k++)
+		cout << " " << output[k][0];
    cout << endl;
 }
 
 void
 CirMgr::printFloatGates() const
 {
+	IdList undef, unused;
+	for (unsigned k = 0; k < i+o+a; k++){
+		if (k < i){
+			unsigned id1 = input[k]/2;
+			CirGate* temp = getGate(id1);
+			GateList out = temp->get_fanin_or_fanout(0);
+			if (out.size() == 0)
+				unused.push_back(id1);
+		}
+		else if (k >= i && k < i+o){
+			unsigned id1 = output[k-i][0];
+			CirGate* temp = getGate(id1);
+			GateList in = temp->get_fanin_or_fanout(1);
+			for (unsigned q = 0; q < in.size(); q++){
+				if (in[q]->getTypeStr() == "UNDEF"){
+					undef.push_back(id1);
+					break;
+				}
+			}
+		}
+		else{
+			unsigned id1 = aig[k-i-o][0]/2;
+			CirGate* temp = getGate(id1);
+			GateList out = temp->get_fanin_or_fanout(0);
+			if (out.size() == 0)
+				unused.push_back(id1);
+			GateList in = temp->get_fanin_or_fanout(1);
+			for (unsigned q = 0; q < in.size(); q++){
+				if (in[q]->getTypeStr() == "UNDEF"){
+					undef.push_back(id1);
+					break;
+				}
+			}
+		}
+	}
+	sort(undef.begin(), undef.end());
+	sort(unused.begin(), unused.end());
+
+	if (undef.size() > 0){
+		cout << "Gates with floating fanin(s):";
+		for (unsigned k = 0; k < undef.size(); k++)
+			cout << " " << undef[k];
+		cout << endl;
+	}
+	if (unused.size() > 0){
+		cout << "Gates defined but not used  :";
+		for (unsigned k = 0; k < unused.size(); k++)
+			cout << " " << unused[k];
+		cout << endl;
+	}
 }
 
 void

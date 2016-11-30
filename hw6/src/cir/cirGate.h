@@ -41,6 +41,13 @@ public:
 			return out_inv[n];
 	}
 
+	GateList get_fanin_or_fanout(int i){ // i = 1 for input; i = 0 for output
+		if (i == 1)
+			return _fanin;
+		else
+			return _fanout;
+	}
+
    // Printing functions
    //virtual void printGate() const = 0;
    void reportGate() const;
@@ -65,6 +72,7 @@ public:
 			_fanout.push_back(p);
 		}
 	}
+	void setSymbol(string &s) { _symbol = s; }
 
 protected:
 	string _type, _symbol;
