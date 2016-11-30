@@ -33,21 +33,40 @@ public:
    string getSymStr() const { return _symbol; }
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
-	bool isINV() const {return ;}
+	bool isINV(int i, unsigned n) const 		// i = 1 for input; i = 0 for output
+	{
+		if (i == 1)
+			return in_inv[n];
+		else
+			return out_inv[n];
+	}
 
    // Printing functions
-   virtual void printGate() const = 0;
+   //virtual void printGate() const = 0;
    void reportGate() const;
    void reportFanin(int level) const;
    void reportFanout(int level) const;
 
 	// setting function
-	void set_inv(unsigned n, int t)
-	{
-		if (t == 1)
+	void set_inv(int n, int t, CirGate* p)  // n = 1 for in_inv; n = 0 for out_inv
+	{											 		 // t = 0 for false; t = 1 for true
+		if (n == 1){
+			if (t == 1)
+				in_inv.push_back(true);
+			else
+				in_inv.push_back(false);
+			_fanin.push_back(p);
+		}
+		else{
+			if (t == 1)
+				out_inv.push_back(true);
+			else
+				out_inv.push_back(false);
+			_fanout.push_back(p);
+		}
 	}
 
-private:
+protected:
 	string _type, _symbol;
 	unsigned _line, _id, _ref;
 	static unsigned _globalRef;
@@ -56,7 +75,7 @@ private:
 	
 };
 
-class ConstGate: public CirGate()
+class ConstGate: public CirGate
 {
 public:
 	ConstGate(){
@@ -67,7 +86,7 @@ public:
 	~ConstGate() {}
 };
 
-class UndefGate: public CirGate()
+class UndefGate: public CirGate
 {
 public:
 	UndefGate(unsigned i){
@@ -76,10 +95,9 @@ public:
 		_type = "UNDEF";
 	}
 	~UndefGate() {}
-	Idlist getOut();
 };
 
-class POGate: public CirGate()
+class POGate: public CirGate
 {
 public:
 	POGate(unsigned i, unsigned li){
@@ -88,9 +106,9 @@ public:
 		_type = "PO";
 	}
 	~POGate() {}
-}
+};
 
-class PIGate: public CirGate()
+class PIGate: public CirGate
 {
 public:
 	PIGate(unsigned i, unsigned li){
@@ -99,9 +117,9 @@ public:
 		_type = "PI";
 	}
 	~PIGate() {}
-}
+};
 
-class AIGGate: public CirGate()
+class AIGGate: public CirGate
 {
 public:
 	AIGGate(unsigned i, unsigned li){
@@ -109,7 +127,7 @@ public:
 		_line = li;
 		_type = "AIG";
 	}
-	~AigGate() {}
+	~AIGGate() {}
 };
 
 

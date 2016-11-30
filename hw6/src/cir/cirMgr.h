@@ -25,8 +25,12 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr() { _idList.push_back(new ConstGate()); }
-   ~CirMgr() { delete []_idList; }
+   CirMgr() 
+	{
+		CirGate* temp = new ConstGate();
+		_idList.push_back(temp);
+	}
+   ~CirMgr() { _idList.clear(); }
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.
@@ -53,12 +57,11 @@ private:
 	GateList _gList, _idList;
 	unsigned m, i, l, o, a;
 	vector <unsigned> input;
-	vector <unsigned> output;
+	vector< vector<unsigned> > output;
 //	vector<unsigned> latch;  // not used in hw6
 	vector< vector<unsigned> > aig;
-	void linkAIG(vector<unsigned>);
-	void linkPO(unsigned);
-	
+	void linkAIG( vector<unsigned> );
+	void linkPo( vector<unsigned> );
 };
 
 #endif // CIR_MGR_H

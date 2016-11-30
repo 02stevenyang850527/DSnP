@@ -152,9 +152,9 @@ parseError(CirParseError err)
 bool
 CirMgr::readCircuit(const string& fileName)
 {
-	ifstream data(filename.c_str(), ios::in);
-	if (!data.is_open){
-		cerr << "Cannot open design \"" << filename << << "\"!!" endl;
+	ifstream data(fileName.c_str(), ios::in);
+	if (!data.is_open()){
+		cerr << "Cannot open design \"" << fileName << "\"!!" << endl;
 		return false;
 	}
 
@@ -163,7 +163,7 @@ CirMgr::readCircuit(const string& fileName)
 
 		istringstream s(line);
 		while (s >> temp){
-			if (temp == "aag"){
+			if (temp == "aag")
 				s >> m >> i >> l >> o >> a;
 			else
 				return false;
@@ -173,7 +173,7 @@ CirMgr::readCircuit(const string& fileName)
 
 		for (unsigned k = 0; k < i; ++k){
 			getline(data, line);
-			s(line);
+			s.str(line);
 			unsigned xdd;
 			s >> xdd;
 			++lineNo;
@@ -189,11 +189,13 @@ CirMgr::readCircuit(const string& fileName)
 
 		for (unsigned k = 0; k < o; ++k){
 			getline(data, line);
-			s(line);
+			s.str(line);
 			unsigned xdd;
 			s >> xdd;
 			++lineNo;
-			output.push_back(xdd);
+			vector <unsigned> temp;
+			temp.push_back(m+1+k); temp.push_back(xdd);
+			output.push_back(temp);
 //			_gList.push_back(new POGate(m + 1 + k, lineNo));
 			_idList[m+1+k] = new POGate(m+1+k, lineNo);
 		}
@@ -201,7 +203,7 @@ CirMgr::readCircuit(const string& fileName)
 		_idList.resize(m + o, 0);
 		for (unsigned k = 0; k < a; ++k){
 			getline(data, line);
-			s(line);
+			s.str(line);
 			unsigned x,y,z;
 			s >> x >> y >> z;
 			vector <unsigned> temp;
@@ -211,6 +213,11 @@ CirMgr::readCircuit(const string& fileName)
 //			_gList.push_back(new AIGGate(x/2, lineNo));
 			_idList[x/2] = new AIGGate(x/2, lineNo);
 		}
+
+		for (unsigned k = 0; k < a; ++k)
+			linkAIG(aig[k]);
+		for (unsigned k = 0; k < o; ++k)
+			linkPo(output[k]);
 		
 	data.close();
 	
@@ -220,19 +227,38 @@ CirMgr::readCircuit(const string& fileName)
 void
 CirMgr::linkAIG(vector <unsigned> aigInfo)
 {
-	CirMgr* temp = getGate(aigInfo[0]/2);
-	CirMgr* p1 = getGate(aigInfo[1]/2);
-	CirMgr* p2 = getGate(aigInfo[2]/2);
+	CirGate* temp = getGate(aigInfo[0]/2);
+	CirGate* p1 = getGate(aigInfo[1]/2);
+	CirGate* p2 = getGate(aigInfo[2]/2);
+	unsigned id1 = aigInfo[1]/2;
+	unsigned id2 = aigInfo[2]/2;
 	if (p1 == 0){
-		unsigned id1 = aigInfo[1]/2;
 		p1 = new UndefGate(id1);
 		_idList[id1] = p1;
 	}
 	if (p2 == 0){
-		unsigned id2 = aigInfo[2]/2;
 		p2 = new UndefGate(id2);
 		_idList[id2] = p2;
 	}
+	temp->set_inv(1, aigInfo[1]%2, p1);
+	temp->set_inv(1, aigInfo[2]%2, p2);
+	p1->set_inv(0, aigInfo[0]/2, temp);
+	p2->set_inv(0, aigInfo[0]/2, temp);
+}
+
+void
+CirMgr::linkPo(vector <unsigned> poInfo)
+{
+	CirGate* temp = getGate(poInfo[0]);
+	CirGate* p = getGate(poInfo[1]/2);
+	unsigned id1 = poInfo[1]/2;
+	if (p == 0){
+		p = new UndefGate(id1);
+		_idList[id1] = p;
+	}
+	temp->set_inv(1, poInfo[1]%2, p);
+	p->set_inv(0, poInfo[0], temp);
+	
 }
 
 /**********************************************************/
