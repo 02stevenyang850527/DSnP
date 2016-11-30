@@ -149,6 +149,9 @@ parseError(CirParseError err)
 /**************************************************************/
 /*   class CirMgr member functions for circuit construction   */
 /**************************************************************/
+
+CirMgr::CirMgr() { _idList.push_back(new ConstGate()); }
+
 bool
 CirMgr::readCircuit(const string& fileName)
 {

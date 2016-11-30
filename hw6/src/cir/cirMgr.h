@@ -25,11 +25,7 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr() 
-	{
-		CirGate* temp = new ConstGate();
-		_idList.push_back(temp);
-	}
+   CirMgr();
    ~CirMgr() { _idList.clear(); }
 
    // Access functions
