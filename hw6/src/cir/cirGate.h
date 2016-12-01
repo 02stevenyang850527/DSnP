@@ -73,6 +73,8 @@ public:
 		}
 	}
 	void setSymbol(string &s) { _symbol = s; }
+	void setMarked() { _ref = _globalRef; }
+	bool isMarked() { return (_ref == _globalRef); }
 
 protected:
 	string _type, _symbol;

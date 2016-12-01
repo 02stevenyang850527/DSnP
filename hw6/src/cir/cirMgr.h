@@ -50,7 +50,7 @@ public:
    void writeAag(ostream&) const;
 
 private:
-	GateList _gList, _idList;
+	GateList _idList;
 	unsigned m, i, l, o, a;
 	IdList input;
 	vector<IdList> output;

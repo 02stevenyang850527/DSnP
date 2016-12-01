@@ -182,7 +182,6 @@ CirMgr::readCircuit(const string& fileName)
 			ss >> xdd;
 			++lineNo;
 			input.push_back(xdd);
-//			_gList.push_back(new PIGate(xdd/2, lineNo));
 			_idList[xdd/2] = new PIGate(xdd/2, lineNo);
 		}
 		
@@ -200,7 +199,6 @@ CirMgr::readCircuit(const string& fileName)
 			vector <unsigned> temp;
 			temp.push_back(m+1+k); temp.push_back(xdd);
 			output.push_back(temp);
-//			_gList.push_back(new POGate(m + 1 + k, lineNo));
 			_idList[m+1+k] = new POGate(m+1+k, lineNo);
 		}
 		
@@ -214,7 +212,6 @@ CirMgr::readCircuit(const string& fileName)
 			temp.push_back(x); temp.push_back(y); temp.push_back(z);
 			aig.push_back(temp);
 			++lineNo;
-//			_gList.push_back(new AIGGate(x/2, lineNo));
 			_idList[x/2] = new AIGGate(x/2, lineNo);
 		}
 
