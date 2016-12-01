@@ -315,6 +315,12 @@ CirMgr::printSummary() const
 void
 CirMgr::printNetlist() const
 {
+	int num = 0;
+	cout << endl;
+	for (unsigned k = 0; k < o; k++){
+		CirGate* temp = getGate(output[k][0]);
+		temp->dfs4NetList(num);
+	}
 }
 
 void
