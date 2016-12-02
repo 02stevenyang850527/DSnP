@@ -268,8 +268,8 @@ CirMgr::linkAIG(vector <unsigned> aigInfo)
 	}
 	temp->set_inv(1, aigInfo[1]%2, p1);
 	temp->set_inv(1, aigInfo[2]%2, p2);
-	p1->set_inv(0, aigInfo[0]/2, temp);
-	p2->set_inv(0, aigInfo[0]/2, temp);
+	p1->set_inv(0, aigInfo[1]%2, temp);
+	p2->set_inv(0, aigInfo[2]%2, temp);
 }
 
 void
@@ -283,7 +283,7 @@ CirMgr::linkPo(vector <unsigned> poInfo)
 		_idList[id1] = p;
 	}
 	temp->set_inv(1, poInfo[1]%2, p);
-	p->set_inv(0, poInfo[0], temp);
+	p->set_inv(0, poInfo[1]%2, temp);
 	
 }
 
@@ -316,6 +316,7 @@ void
 CirMgr::printNetlist() const
 {
 	int num = 0;
+	CirGate::setGlobalRef();
 	cout << endl;
 	for (unsigned k = 0; k < o; k++){
 		CirGate* temp = getGate(output[k][0]);

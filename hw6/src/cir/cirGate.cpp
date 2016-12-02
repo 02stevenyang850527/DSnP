@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdarg.h>
 #include <cassert>
+#include <algorithm>
 #include "cirGate.h"
 #include "cirMgr.h"
 #include "util.h"
@@ -91,24 +92,21 @@ CirGate::dfsFanin(int level, int recur, bool inv) const
 		cout << "  ";
 	if (inv)
 		cout << "!";
-	cout << _type << " " << _id << endl;
-	unsigned n = 0;
-	for ( ; n < _fanin.size(); ++n){
-		if (!_fanin[n]->isGlobalRef())
-			_fanin[n]->dfsFanin(level-1, recur+1,isINV(1,n));
-		else{
-			for (int cnt = 0; cnt < recur; ++cnt)
-				cout << "  ";
-			if (isINV(1,n))
-					cout << "!";
-			cout << _fanin[n]-> getTypeStr() << " " << _fanin[n]->getIdNo();
-			if (_fanin[n]->_fanin.size() > 0 && level > 0)
-			if (_fanin[n]->_fanin[0]->isGlobalRef())
-				cout << " (*)";
-			cout << endl;
-		}
+	cout << _type << " " << _id;
+
+	unsigned size = _fanin.size();
+
+	if (level == 0) 
+		cout << endl;	
+	else if ( isGlobalRef()) 
+		cout << " (*)" << endl;
+	else{
+		cout << endl;
+		for (unsigned k = 0 ; k < size; ++k)
+			_fanin[k]->dfsFanin(level-1, recur+1, isINV(1,k));
+		if (size != 0)
+			set2GlobalRef();
 	}
-	set2GlobalRef();
 }
 
 void
@@ -120,17 +118,37 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
 		cout << "  ";
 	if (inv)
 		cout << "!";
-	cout << _type << " " << _id << endl;
-	set2GlobalRef();
-	for (unsigned k = 0; k < _fanout.size(); ++k){
-		if (!_fanout[k]->isGlobalRef())
-			_fanout[k]->dfsFanout(level-1, recur+1, isINV(0,k));
-		else{
-			for (int cnt = 0; cnt < recur; ++cnt)
-				cout << "  ";
-			if (isINV(0,k))
-				cout << "!";
-			cout << _type << " " << _id << " (*)" << endl;
-		}
+	cout << _type << " " << _id ;
+	
+	unsigned size = _fanout.size();
+	
+	if (level == 0)
+		cout << endl;
+	else if ( isGlobalRef())
+		cout << " (*)" << endl;
+	else{
+		cout << endl;
+		for (unsigned k = 0; k < _fanout.size(); ++k)
+				_fanout[k]->dfsFanout(level-1, recur+1, isINV(0,k));
+		if (size != 0)
+			set2GlobalRef();
 	}
 }
+/*
+void
+CirGate::reOrder_output()
+{
+	IdList temp;
+	vector< vector<int> > recordInv;
+	for (unsigned k = 0; k < _fanout.size(); ++k){
+		unsigned XDD = _fanout[k]->getIdNo();
+		temp.push_back(XDD);
+		vector <int> tmp;
+		
+	}
+	sort(temp.begin(), temp.end());
+	_fanout.clear();
+	for (unsigned k = 0; k < _temp.size(); ++k)
+		_fanout.push_back(getGate(temp[k]));
+	
+}*/

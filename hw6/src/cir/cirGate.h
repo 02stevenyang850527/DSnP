@@ -57,6 +57,7 @@ public:
 	// Depth First Search function
 	void dfs4NetList(int&) const;
 	void dfsFanin(int, int, bool) const;
+	void dfsFanout(int, int, bool) const;
 
 	// Setting function
 	void set_inv(int n, int t, CirGate* p)  // n = 1 for in_inv; n = 0 for out_inv
@@ -77,6 +78,7 @@ public:
 		}
 	}
 	void setSymbol(string& s) { _symbol = s; }
+//	void reOrder_output();
 	static void setGlobalRef() { _globalRef++; }
 
 protected:
@@ -86,7 +88,7 @@ protected:
 	static unsigned _globalRef;
 	GateList _fanin, _fanout;
 	vector<bool> in_inv, out_inv;
-	void set2GlobalRef() const { _ref = _globalRef; }
+	void set2GlobalRef() const { _ref = _globalRef;} //cout << "set ref!! _id is "<< _id << endl; }
 	bool isGlobalRef() const { return (_ref == _globalRef); }
 	
 };
