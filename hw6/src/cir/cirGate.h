@@ -55,7 +55,8 @@ public:
    void reportFanout(int level) const;
 
 	// Depth First Search function
-	void dfs4NetList(int& ) ;
+	void dfs4NetList(int&) const;
+	void dfsFanin(int, int, bool) const;
 
 	// Setting function
 	void set_inv(int n, int t, CirGate* p)  // n = 1 for in_inv; n = 0 for out_inv
@@ -80,12 +81,13 @@ public:
 
 protected:
 	string _type, _symbol;
-	unsigned _line, _id, _ref;
+	unsigned _line, _id;
+	mutable unsigned _ref;
 	static unsigned _globalRef;
 	GateList _fanin, _fanout;
 	vector<bool> in_inv, out_inv;
-	void set2GlobalRef() { _ref = _globalRef; }
-	bool isGlobalRef() { return (_ref == _globalRef); }
+	void set2GlobalRef() const { _ref = _globalRef; }
+	bool isGlobalRef() const { return (_ref == _globalRef); }
 	
 };
 
