@@ -400,10 +400,8 @@ CirMgr::printFloatGates() const
 void
 CirMgr::writeAag(ostream& outfile) const
 {
-//	vector <IdList> idtemp;
 	IdList idtemp;
 	CirGate::setGlobalRef();
-//	unsigned aigsize = 0;
 
 	for (unsigned k = 0; k < o; ++k){
 		CirGate* temp = getGate(output[k][0]);
