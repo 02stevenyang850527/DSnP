@@ -134,6 +134,26 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
 			set2GlobalRef();
 	}
 }
+
+void
+CirGate::dfs4Write(IdList& record) const
+{
+	if (this->_type == "UNDEF")
+		return;
+	for (unsigned k = 0; k < _fanin.size(); ++k){
+		if (!_fanin[k]->isGlobalRef())
+			_fanin[k]->dfs4Write(record);
+	}
+	for (unsigned k = 0; k < _fanin.size(); ++k){
+		if (_fanin[k]->getTypeStr() == "AIG" && !_fanin[k]->isGlobalRef()){
+			record.push_back(_fanin[k]->getIdNo());
+		}
+	}
+	if (!isGlobalRef() && _type == "AIG")
+		record.push_back(_id);
+	set2GlobalRef();
+}
+
 /*
 void
 CirGate::reOrder_output()

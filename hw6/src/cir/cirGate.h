@@ -58,6 +58,7 @@ public:
 	void dfs4NetList(int&) const;
 	void dfsFanin(int, int, bool) const;
 	void dfsFanout(int, int, bool) const;
+	void dfs4Write(IdList& ) const;
 
 	// Setting function
 	void set_inv(int n, int t, CirGate* p)  // n = 1 for in_inv; n = 0 for out_inv

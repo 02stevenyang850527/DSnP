@@ -400,4 +400,45 @@ CirMgr::printFloatGates() const
 void
 CirMgr::writeAag(ostream& outfile) const
 {
+//	vector <IdList> idtemp;
+	IdList idtemp;
+	CirGate::setGlobalRef();
+//	unsigned aigsize = 0;
+
+	for (unsigned k = 0; k < o; ++k){
+		CirGate* temp = getGate(output[k][0]);
+		temp->dfs4Write(idtemp);
+	}
+	
+	outfile << "aag " << m << " " << i << " " << l << " "
+			  << o << " " << idtemp.size() << endl;
+	for (unsigned k = 0; k < i; ++k)
+		outfile << input[k] << endl;
+	for (unsigned k = 0; k < o; ++k)
+		outfile << output[k][1] << endl;
+
+	for (unsigned k = 0; k < idtemp.size(); ++k){
+		for (unsigned t = 0; t < aig.size(); ++t)
+			if ( (aig[t][0])/2 == idtemp[k]){
+				outfile << aig[t][0] << " " << aig[t][1]
+						  << " " << aig[t][2] << endl;
+				break;
+			}
+	}
+	for (unsigned k = 0; k < i; ++k){
+		CirGate* temp = getGate(input[k]/2);
+		string str = temp->getSymStr();
+		if (str.size() > 0)
+			cout << "i" << k << " " << str << endl;
+	}
+	for (unsigned k = 0; k < o; ++k){
+		CirGate* temp = getGate(output[k][0]);
+		string str = temp->getSymStr();
+		if (str.size() > 0)
+			cout << "o" << k << " " << str << endl;
+	}
+	
+	outfile << "c\n";
+	outfile << "AAG output by Steven Yang\n";
+	
 }
