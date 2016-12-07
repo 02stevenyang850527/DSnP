@@ -26,7 +26,14 @@ class CirGate
 {
 public:
    CirGate() { _ref = 0; }
-   virtual ~CirGate() {}
+   virtual ~CirGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 
    // Basic access methods
    string getTypeStr() const { return _type; }
@@ -89,7 +96,7 @@ protected:
 	static unsigned _globalRef;
 	GateList _fanin, _fanout;
 	vector<bool> in_inv, out_inv;
-	void set2GlobalRef() const { _ref = _globalRef;} //cout << "set ref!! _id is "<< _id << endl; }
+	void set2GlobalRef() const { _ref = _globalRef; }
 	bool isGlobalRef() const { return (_ref == _globalRef); }
 	
 };
@@ -102,7 +109,14 @@ public:
 		_line = 0;
 		_type = "CONST";
 	}
-	~ConstGate() {}
+	~ConstGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 };
 
 class UndefGate: public CirGate
@@ -113,7 +127,14 @@ public:
 		_line = 0;
 		_type = "UNDEF";
 	}
-	~UndefGate() {}
+	~UndefGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 };
 
 class POGate: public CirGate
@@ -124,7 +145,14 @@ public:
 		_line =li;
 		_type = "PO";
 	}
-	~POGate() {}
+	~POGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 };
 
 class PIGate: public CirGate
@@ -135,7 +163,14 @@ public:
 		_line = li;
 		_type = "PI";
 	}
-	~PIGate() {}
+	~PIGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 };
 
 class AIGGate: public CirGate
@@ -146,7 +181,14 @@ public:
 		_line = li;
 		_type = "AIG";
 	}
-	~AIGGate() {}
+	~AIGGate() {
+		for (unsigned i = 0; i < _fanin.size(); ++i)
+			delete _fanin[i];
+		for (unsigned i = 0; i < _fanout.size(); ++i)
+			delete _fanout[i];
+		_fanin.clear();
+		_fanout.clear();
+	}
 };
 
 
