@@ -415,25 +415,31 @@ CirMgr::writeAag(ostream& outfile) const
 	for (unsigned k = 0; k < o; ++k)
 		outfile << output[k][1] << endl;
 
-	for (unsigned k = 0; k < idtemp.size(); ++k){
-		for (unsigned t = 0; t < aig.size(); ++t)
-			if ( (aig[t][0])/2 == idtemp[k]){
-				outfile << aig[t][0] << " " << aig[t][1]
-						  << " " << aig[t][2] << endl;
-				break;
-			}
+	for (unsigned k = 0; k < idtemp.size(); k++){
+		CirGate* temp = getGate(idtemp[k]);
+		outfile << 2*idtemp[k];
+		GateList idd = temp->get_fanin_or_fanout(1);
+		for (unsigned n = 0; n < 2; n++){
+			unsigned id1 = idd[n]->getIdNo();
+			if (temp->isINV(1,n))
+				cout << " " << (2*id1+1);
+			else
+				cout << " " << (2*id1);
+		}
+		cout << endl;
 	}
+
 	for (unsigned k = 0; k < i; ++k){
 		CirGate* temp = getGate(input[k]/2);
 		string str = temp->getSymStr();
 		if (str.size() > 0)
-			cout << "i" << k << " " << str << endl;
+			outfile << "i" << k << " " << str << endl;
 	}
 	for (unsigned k = 0; k < o; ++k){
 		CirGate* temp = getGate(output[k][0]);
 		string str = temp->getSymStr();
 		if (str.size() > 0)
-			cout << "o" << k << " " << str << endl;
+			outfile << "o" << k << " " << str << endl;
 	}
 	
 	outfile << "c\n";
