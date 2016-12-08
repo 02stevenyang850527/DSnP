@@ -152,7 +152,13 @@ parseError(CirParseError err)
 /**************************************************************/
 
 CirMgr::CirMgr() { _idList.push_back(new ConstGate()); }
-
+CirMgr::~CirMgr() {
+	for (unsigned i = 0; i < _idList.size(); ++i)
+		delete _idList[i];
+	output.clear();
+	input.clear();
+	aig.clear();
+}
 bool
 CirMgr::readCircuit(const string& fileName)
 {

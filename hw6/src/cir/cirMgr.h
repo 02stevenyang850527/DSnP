@@ -26,7 +26,7 @@ class CirMgr
 {
 public:
    CirMgr();
-   ~CirMgr() { _idList.clear(); output.clear(); input.clear(); aig.clear(); }
+   ~CirMgr();
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.

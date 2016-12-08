@@ -26,13 +26,13 @@ class CirGate
 {
 public:
    CirGate() { _ref = 0; }
-   virtual ~CirGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
+   virtual ~CirGate(){
 		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();
 	}
 
    // Basic access methods
@@ -110,12 +110,12 @@ public:
 		_type = "CONST";
 	}
 	~ConstGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
-		_fanin.clear();
+/*		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();*/
 	}
 };
 
@@ -128,12 +128,12 @@ public:
 		_type = "UNDEF";
 	}
 	~UndefGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
-		_fanin.clear();
+/*		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();*/
 	}
 };
 
@@ -146,12 +146,12 @@ public:
 		_type = "PO";
 	}
 	~POGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
-		_fanin.clear();
+/*		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();*/
 	}
 };
 
@@ -164,12 +164,12 @@ public:
 		_type = "PI";
 	}
 	~PIGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
-		_fanin.clear();
+/*		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();*/
 	}
 };
 
@@ -182,12 +182,12 @@ public:
 		_type = "AIG";
 	}
 	~AIGGate() {
-		for (unsigned i = 0; i < _fanin.size(); ++i)
-			delete _fanin[i];
-		for (unsigned i = 0; i < _fanout.size(); ++i)
-			delete _fanout[i];
-		_fanin.clear();
+/*		_fanin.clear();
 		_fanout.clear();
+		_type.clear();
+		_symbol.clear();
+		in_inv.clear();
+		out_inv.clear();*/
 	}
 };
 
