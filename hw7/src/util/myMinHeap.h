@@ -35,10 +35,12 @@ public:
 		_data.push_back(d);
 		while (t > 0){
 			int p = (t-1)/2 ;
-			if (d >= _data[p])
+			if (d < _data[p]){
+				_data[t] = _data[p];
+				t = p;
+			}
+			else
 				break;
-			_data[t] = _data[p];
-			t = p;
 		}
 		_data[t] = d;
 	}
@@ -54,7 +56,7 @@ public:
 
 		while (t < n){
 			if (t+1 < n)   // has right child
-				if (_data[t] > _data[t+1])
+				if (_data[t+1] < _data[t])
 					++t;  // to the smaller child
 			if (temp < _data[t])
 				break;
@@ -63,7 +65,17 @@ public:
 			t = 2*i +1;
 		}
 	
-	
+		int p = (t-1)/2;
+		while (p > 0){
+			if (temp < _data[p]){
+				_data[t] = _data[p];
+				t = p;
+				p = (t-1)/2;
+			}
+			else
+				break;
+		}
+		_data[t] = temp;
 	}
 
 private:
