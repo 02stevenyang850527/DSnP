@@ -48,8 +48,42 @@ public:
       friend class HashSet<Data>;
 
    public:
+		iterator() {} // for initial compile
+		iterator(vector <Data>* b, size_t num, size_t m, size_t n = 0):
+			_numB(num), _bucks(b), _row(m), _col(n){}
+		~iterator() {}
+		const Data& operator * () const { return _bucks[_row][_col]; }
+		Data& operator * () { return _bucks[_row][_col];}
+		iterator& operator ++ (){
+			return *this;
+		}
+		iterator operator ++ (int){
+			iterator temp = iterator(*this);
+			++(*this);
+			return temp;
+		}
+		iterator& operator -- (){
+			return *this;
+		}
+		iterator operator -- (int){
+			iterator temp = iterator(*this);
+			--(this);
+			return temp;
+		}
+		iterator& operator = (const iterator& i){
+			_numB = i._numB;
+			_row = i._row;
+			_col = i._col;
+			_bucks = i._bucks;
+			return *this;
+		}
+		bool operator == (const iterator& i){ return ((_row == i._row) && (_col == i._col)); }
+		bool operator != (const iterator& i){ return !(*this == i);}
 
    private:
+		size_t _numB, _row, _col;
+		vector <Data>* _bucks;
+		
    };
 
    void init(size_t b) { _numBuckets = b; _buckets = new vector<Data>[b]; }
@@ -68,13 +102,30 @@ public:
    // TODO: implement these functions
    //
    // Point to the first valid data
-   iterator begin() const { return iterator(); }
+   iterator begin() const {
+		for (size_t i = 0; i < _numBuckets; ++i){
+			if (_buckets[i].size() > 0)
+				return iterator(_buckets, _numBuckets, i);
+		}
+		return end();
+	}
    // Pass the end
-   iterator end() const { return iterator(); }
+   iterator end() const { return iterator(); } //TODO
    // return true if no valid data
-   bool empty() const { return true; }
+   bool empty() const {
+		for (size_t i = 0; i < _numBuckets; ++i){
+			if (_buckets[i].size() > 0)
+				return false;
+		}
+		return true;
+	}
    // number of valid data
-   size_t size() const { size_t s = 0; return s; }
+   size_t size() const {
+		size_t s = 0;
+		for (size_t i = 0; i < _numBuckets; ++i)
+			s += _buckets[i].size();
+		return s;
+	}
 
    // check if d is in the hash...
    // if yes, return true;
