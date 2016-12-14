@@ -173,7 +173,7 @@ public:
 		size_t loc = bucketNum(d);
 		for (size_t i = 0; i < _buckets[loc].size(); ++i)
 			if (_buckets[loc][i] == d){
-				d = buckets[loc][i];
+				d = _buckets[loc][i];
 				return true;
 			}
 		return false;
@@ -188,7 +188,7 @@ public:
 			if (_buckets[loc][i] == d)
 				return true;
 
-		_buckets[n].push_back(d);
+		_buckets[loc].push_back(d);
 		return false;
 	}
 
@@ -200,7 +200,7 @@ public:
 			if (_buckets[loc][i] == d)
 				return false;
 
-		_buckets[n].push_back(d);
+		_buckets[loc].push_back(d);
 		return true;
 	}
 
@@ -208,7 +208,7 @@ public:
    // return fasle otherwise (i.e. nothing is removed)
    bool remove(const Data& d) {
 		size_t loc = bucketNum(d);
-		for (size_t i = 0; i < _bucket[loc].size(); ++i)
+		for (size_t i = 0; i < _buckets[loc].size(); ++i)
 			if (_buckets[loc][i] == d){
 				_buckets[loc].erase(_buckets[loc].begin() + i);
 				return true;
