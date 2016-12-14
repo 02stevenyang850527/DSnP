@@ -48,13 +48,21 @@ public:
       friend class HashSet<Data>;
 
    public:
-		iterator() {} // for initial compile
 		iterator(vector <Data>* b, size_t num, size_t m, size_t n = 0):
-			_numB(num), _bucks(b), _row(m), _col(n){}
+			  _bucks(b), _numB(num), _row(m), _col(n){}
 		~iterator() {}
 		const Data& operator * () const { return _bucks[_row][_col]; }
 		Data& operator * () { return _bucks[_row][_col];}
 		iterator& operator ++ (){
+			if (_row >= _numB)
+				return *this;
+			if (_col+1 < _bucks[_row].size())
+				++_col;
+			else{
+				while (++_row < _numB)
+					if (_bucks[_row].size() > 0)
+						break;
+			}
 			return *this;
 		}
 		iterator operator ++ (int){
@@ -81,8 +89,8 @@ public:
 		bool operator != (const iterator& i){ return !(*this == i);}
 
    private:
-		size_t _numB, _row, _col;
 		vector <Data>* _bucks;
+		size_t _numB, _row, _col;
 		
    };
 
@@ -110,7 +118,7 @@ public:
 		return end();
 	}
    // Pass the end
-   iterator end() const { return iterator(); } //TODO
+   iterator end() const { return iterator(_buckets,_numBuckets, _numBuckets); } //TODO
    // return true if no valid data
    bool empty() const {
 		for (size_t i = 0; i < _numBuckets; ++i){
