@@ -128,7 +128,7 @@ TaskMgr::assign(size_t l)
 	temp += l;
 	_taskHeap.delMin();
 	_taskHeap.insert(temp);
-	_taskHash.insert(temp);
+	_taskHash.update(temp);
    return true;
 }
 
