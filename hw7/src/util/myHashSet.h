@@ -137,7 +137,7 @@ public:
 		return end();
 	}
    // Pass the end
-   iterator end() const { return iterator(_buckets,_numBuckets, _numBuckets); } //TODO
+   iterator end() const { return iterator(_buckets, _numBuckets, _numBuckets); } //TODO
    // return true if no valid data
    bool empty() const {
 		for (size_t i = 0; i < _numBuckets; ++i){
@@ -185,9 +185,10 @@ public:
    bool update(const Data& d) {
 		size_t loc = bucketNum(d);
 		for (size_t i = 0; i < _buckets[loc].size(); ++i)
-			if (_buckets[loc][i] == d)
+			if (_buckets[loc][i] == d){
+				_buckets[loc][i] = d;
 				return true;
-
+			}
 		_buckets[loc].push_back(d);
 		return false;
 	}
@@ -208,12 +209,14 @@ public:
    // return fasle otherwise (i.e. nothing is removed)
    bool remove(const Data& d) {
 		size_t loc = bucketNum(d);
-		for (size_t i = 0; i < _buckets[loc].size(); ++i)
+		size_t si = _buckets[loc].size();
+		for (size_t i = 0; i < si; ++i)
 			if (_buckets[loc][i] == d){
 				_buckets[loc][i] = _buckets[loc].back();
-				_buckets[loc].resize(_buckets[loc].size()-1);
+				_buckets[loc].resize(si-1);
 				return true;
 			}
+
 		return false;
 	}
 

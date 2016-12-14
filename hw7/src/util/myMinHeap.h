@@ -47,37 +47,72 @@ public:
 
    void delMin() { delData(0); }
    void delData(size_t i) {
-		int t = 2*i + 1;
-		int n = _data.size();
-		if (n == 0 || unsigned(n) <= i)
+/*		if (_data.empty())
 			return;
-		Data temp = _data[n-1];
-		_data.pop_back();
-		--n;
-		if (i == unsigned(n)) return;
-
-		while (t < n){
-			if (t+1 < n)   // has right child
-				if (_data[t+1] < _data[t])
-					++t;  // to the smaller child
+		Data temp = _data.back();
+		int s = _data.size();
+		_data.resize(--s);
+		if (i == unsigned(s))
+			return;
+		int p = i, t = 2*p + 1;
+		while (p < s){
+			if (t < s-1) // has right child
+			if (_data[t+1] < _data[t])
+				++t;    // to the smaller child
 			if (temp < _data[t])
 				break;
-			_data[i] = _data[t];
-			i = t;
-			t = 2*i +1;
+			_data[p] = _data[t];
+			p = t;
+			t = 2*p + 1;
 		}
-	
-		int p = (t-1)/2;
-		while (p > 0){
-			if (temp < _data[p]){
-				_data[t] = _data[p];
-				t = p;
-				p = (t-1)/2;
+		int p2 = (t-1)/2;
+		while (p2 > 0){
+			if (temp < _data[p2]){
+				_data[t] = _data[p2];
+				t = p2;
+				p2 = (t-1)/2;
 			}
 			else
 				break;
 		}
-		_data[p] = temp;
+		_data[t] = temp;
+*/     if(_data.empty()) return;
+
+      swap(_data[i], _data.back());
+      int s = _data.size();
+      _data.resize(--s);
+      if(i == (size_t) s) return;
+      //floating
+      int a = i;
+      int p;
+      if(a > 0) p = (a - 1) / 2;
+      else p = 0;
+
+      bool flt = 0;
+      while(p > 0) {
+         if(_data[p] < _data[a] || _data[a].getLoad() == _data[p].getLoad()) {
+            break;
+         } else {
+            swap(_data[a], _data[p]);
+            flt = 1;
+            a = p;
+            if(a > 0) p = (a - 1) / 2;
+            else p = 0;
+         }
+      }
+      if(flt) return;
+      //sinking
+      int b = a * 2 + 1;
+      while(b < s) {
+         if(b + 1 < s && (_data[b + 1] < _data[b])) b++;
+         if(_data[a] < _data[b] || _data[b].getLoad() == _data[a].getLoad()) {
+            break;
+         } else {
+            swap(_data[a], _data[b]);
+            a = b;
+            b = 2 * a + 1;
+         }
+		}
 	}
 
 private:
