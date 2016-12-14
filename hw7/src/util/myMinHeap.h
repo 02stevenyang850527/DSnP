@@ -49,10 +49,12 @@ public:
    void delData(size_t i) {
 		int t = 2*i + 1;
 		int n = _data.size();
+		if (n == 0 || unsigned(n) <= i)
+			return;
 		Data temp = _data[n-1];
 		_data.pop_back();
 		--n;
-		if (i == n) return;
+		if (i == unsigned(n)) return;
 
 		while (t < n){
 			if (t+1 < n)   // has right child
@@ -75,7 +77,7 @@ public:
 			else
 				break;
 		}
-		_data[t] = temp;
+		_data[p] = temp;
 	}
 
 private:

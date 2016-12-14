@@ -210,7 +210,8 @@ public:
 		size_t loc = bucketNum(d);
 		for (size_t i = 0; i < _buckets[loc].size(); ++i)
 			if (_buckets[loc][i] == d){
-				_buckets[loc].erase(_buckets[loc].begin() + i);
+				_buckets[loc][i] = _buckets[loc].back();
+				_buckets[loc].resize(_buckets[loc].size()-1);
 				return true;
 			}
 		return false;
