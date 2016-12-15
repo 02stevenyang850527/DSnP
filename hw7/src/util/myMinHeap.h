@@ -50,34 +50,41 @@ public:
 		if (_data.empty())
 			return;
 		Data temp = _data.back();
+	//	_data[i] = temp;
 		int s = _data.size();
 		_data.resize(--s);
-		if (i == unsigned(s))
+		if (i== unsigned(s))
 			return;
-		int a = i, p = (a - 1)/2;
+		int a = i; 
+		int p;
+
+		if (a > 0)
+			p = (a-1)/2;
+		else p = 0;
+		bool _float = false;
 		while (p > 0){
-			if (temp < _data[p]){
-				_data[p] = _data[a];
-				a = p;
-				p = (a - 1)/2;
-			}
-			else
+		//	cout << "float\n";
+			if (_data[p] < temp || temp.getLoad() == _data[p].getLoad()){
 				break;
+			}
+			_data[p] = _data[a];
+			a = p;
+			p = (a - 1)/2;
+			_float = true;
 		}
-		int b = i, t = 2*b + 1;
-		while (b < (int)_data.size()){
-			if (t < s)
+		int b = a;
+		int t = 2*b + 1;
+		while (t < (int)_data.size() && _float){
+			if (t+1 < s)
 			if (_data[t+1] < _data[t])
 				++t;
-			if (temp < _data[t])
+			if (temp < _data[t] || temp.getLoad() == _data[t].getLoad())
 				break;
 			_data[b] = _data[t];
 			b = t;
 			t = 2*b +1;
 		}
-		cout << "s: " << s << endl;
-		cout << "b: " << (b-1)/2 << endl;
-		_data[(b-1)/2] = temp;
+		_data[b] = temp;
 /*     if(_data.empty()) return;
 
       swap(_data[i], _data.back());
