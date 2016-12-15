@@ -49,28 +49,30 @@ public:
    void delData(size_t i) {
 		if (_data.empty())
 			return;
-		int a = i+1; 
-		int p = 2*a;
-		while ( (unsigned)p <= size()){
-			if ( (unsigned)p < size())
-				if (_data[p] < _data[p-1]) ++p;
-			if (_data[size()-1] < _data[p-1] || _data[size()-1].getLoad() == _data[p-1].getLoad())
+		int a = i; 
+		int p = 2*a + 1;
+		int s = size();
+		while ( p < s){
+			if ( p < s - 1)
+				if (_data[p+1] < _data[p]) ++p;
+			if (_data[s-1] < _data[p] || _data[s-1].getLoad() == _data[p].getLoad())
 				break;
-			_data[a-1] = _data[p-1];
+			_data[a] = _data[p];
 			a = p;
-			p = 2*a;
+			p = 2*a + 1;
 		}
-		_data[a-1] = _data[size()-1];
+		_data[a] = _data[s-1];
 
-		while (a > 1){
-			if (_data[a-1] < _data[a/2-1]){
-				swap(_data[a-1], _data[a/2-1]);
+		while (a > 0){
+			int parent = (a-1)/2;
+			if (_data[a] < _data[parent]){
+				swap(_data[a], _data[parent]);
 			}
 			else
 				break;
-			a /= 2;
+			a = parent;
 		}
-		_data.resize(size()-1);
+		_data.resize(s-1);
 	}
 
 private:
