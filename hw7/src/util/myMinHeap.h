@@ -47,36 +47,38 @@ public:
 
    void delMin() { delData(0); }
    void delData(size_t i) {
-/*		if (_data.empty())
+		if (_data.empty())
 			return;
 		Data temp = _data.back();
 		int s = _data.size();
 		_data.resize(--s);
 		if (i == unsigned(s))
 			return;
-		int p = i, t = 2*p + 1;
-		while (p < s){
-			if (t < s-1) // has right child
-			if (_data[t+1] < _data[t])
-				++t;    // to the smaller child
-			if (temp < _data[t])
-				break;
-			_data[p] = _data[t];
-			p = t;
-			t = 2*p + 1;
-		}
-		int p2 = (t-1)/2;
-		while (p2 > 0){
-			if (temp < _data[p2]){
-				_data[t] = _data[p2];
-				t = p2;
-				p2 = (t-1)/2;
+		int a = i, p = (a - 1)/2;
+		while (p > 0){
+			if (temp < _data[p]){
+				_data[p] = _data[a];
+				a = p;
+				p = (a - 1)/2;
 			}
 			else
 				break;
 		}
-		_data[t] = temp;
-*/     if(_data.empty()) return;
+		int b = i, t = 2*b + 1;
+		while (b < (int)_data.size()){
+			if (t < s)
+			if (_data[t+1] < _data[t])
+				++t;
+			if (temp < _data[t])
+				break;
+			_data[b] = _data[t];
+			b = t;
+			t = 2*b +1;
+		}
+		cout << "s: " << s << endl;
+		cout << "b: " << (b-1)/2 << endl;
+		_data[(b-1)/2] = temp;
+/*     if(_data.empty()) return;
 
       swap(_data[i], _data.back());
       int s = _data.size();
@@ -113,7 +115,7 @@ public:
             b = 2 * a + 1;
          }
 		}
-	}
+*/	}
 
 private:
    // DO NOT add or change data members
