@@ -49,80 +49,29 @@ public:
    void delData(size_t i) {
 		if (_data.empty())
 			return;
-		Data temp = _data.back();
-	//	_data[i] = temp;
-		int s = _data.size();
-		_data.resize(--s);
-		if (i== unsigned(s))
-			return;
-		int a = i; 
-		int p;
-
-		if (a > 0)
-			p = (a-1)/2;
-		else p = 0;
-		bool _float = false;
-		while (p > 0){
-		//	cout << "float\n";
-			if (_data[p] < temp || temp.getLoad() == _data[p].getLoad()){
+		int a = i+1; 
+		int p = 2*a;
+		while ( (unsigned)p <= size()){
+			if ( (unsigned)p < size())
+				if (_data[p] < _data[p-1]) ++p;
+			if (_data[size()-1] < _data[p-1] || _data[size()-1].getLoad() == _data[p-1].getLoad())
 				break;
-			}
-			_data[p] = _data[a];
+			_data[a-1] = _data[p-1];
 			a = p;
-			p = (a - 1)/2;
-			_float = true;
+			p = 2*a;
 		}
-		int b = a;
-		int t = 2*b + 1;
-		while (t < (int)_data.size() && _float){
-			if (t+1 < s)
-			if (_data[t+1] < _data[t])
-				++t;
-			if (temp < _data[t] || temp.getLoad() == _data[t].getLoad())
+		_data[a-1] = _data[size()-1];
+
+		while (a > 1){
+			if (_data[a-1] < _data[a/2-1]){
+				swap(_data[a-1], _data[a/2-1]);
+			}
+			else
 				break;
-			_data[b] = _data[t];
-			b = t;
-			t = 2*b +1;
+			a /= 2;
 		}
-		_data[b] = temp;
-/*     if(_data.empty()) return;
-
-      swap(_data[i], _data.back());
-      int s = _data.size();
-      _data.resize(--s);
-      if(i == (size_t) s) return;
-      //floating
-      int a = i;
-      int p;
-      if(a > 0) p = (a - 1) / 2;
-      else p = 0;
-
-      bool flt = 0;
-      while(p > 0) {
-         if(_data[p] < _data[a] || _data[a].getLoad() == _data[p].getLoad()) {
-            break;
-         } else {
-            swap(_data[a], _data[p]);
-            flt = 1;
-            a = p;
-            if(a > 0) p = (a - 1) / 2;
-            else p = 0;
-         }
-      }
-      if(flt) return;
-      //sinking
-      int b = a * 2 + 1;
-      while(b < s) {
-         if(b + 1 < s && (_data[b + 1] < _data[b])) b++;
-         if(_data[a] < _data[b] || _data[b].getLoad() == _data[a].getLoad()) {
-            break;
-         } else {
-            swap(_data[a], _data[b]);
-            a = b;
-            b = 2 * a + 1;
-         }
-		}
-*/	}
+		_data.resize(size()-1);
+	}
 
 private:
    // DO NOT add or change data members

@@ -56,6 +56,8 @@ TaskMgr::remove(size_t nMachines)
 {        
    for (size_t i = 0, n = nMachines; i < n; ++i) {
       size_t j = rnGen(size());
+	//	if (_taskHash.remove(_taskHeap[j]) == false)
+	//		cout << "fuck you\n";
       assert(_taskHash.remove(_taskHeap[j]));
       cout << "Task node removed: " << _taskHeap[j] << endl;
       _taskHeap.delData(j);
@@ -90,7 +92,7 @@ TaskMgr::add(size_t nMachines)
 		TaskNode temp;
 		if (_taskHash.insert(temp)){
 			_taskHeap.insert(temp);
-		cout << "Task node inserted: " << temp << endl;
+			cout << "Task node inserted: " << temp << endl;
 		}
 		else
 			i--;
