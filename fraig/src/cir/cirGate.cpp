@@ -155,3 +155,37 @@ CirGate::dfs4Write(IdList& record) const
    set2GlobalRef();
 }
 
+void
+CirGate::reconnect(unsigned id)
+{
+   for (unsigned k = 0; k < _fanin.size(); ++k){
+      for (unsigned j = 0; j < _fanin[k]->_fanout.size(); ++j){
+         if (_fanin[k]->_type == "UNDEF"){
+            cout << "Sweeping: UNDEF" << "(" << _fanin[k]->getIdNo()
+                 << ") removed..." << endl;
+            delete _fanin[k];
+            _fanin.erase(_fanin.begin() + k);
+            --k;
+            break;
+         }
+         if (_fanin[k]->_type == "PI"){
+            if (_fanin[k]->_fanout[j]->getIdNo() == id){
+               _fanin[k]->_fanout.erase(_fanin[k]->_fanout.begin() + j);
+               --j;
+               break;
+            }
+         }
+      }
+   }
+
+   for (unsigned k = 0; k < _fanout.size(); ++k){
+      for (unsigned j = 0; j < _fanout[k]->_fanin.size(); ++j){
+         if (_fanout[k]->_fanin[j]->getIdNo() == id){
+            _fanout[k]->_fanin.erase(_fanout[k]->_fanin.begin() + j);
+            --j;
+            break;
+         }
+      }
+   }
+   cout << "Sweeping: AIG" << "(" << id << ") removed..." << endl;
+}

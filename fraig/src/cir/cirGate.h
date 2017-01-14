@@ -81,6 +81,7 @@ public:
       _fanout.push_back(p);
    }
    void setSymbol(string& s) { _symbol = s; }
+   void reconnect(unsigned id); // for sweeping
    static void setGlobalRef() { _globalRef++; }
 
 private:
