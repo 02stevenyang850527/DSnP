@@ -17,7 +17,10 @@
 
 using namespace std;
 
+
 // TODO: Feel free to define your own classes, variables, or functions.
+
+#define NEG 0x1
 
 class CirGate;
 
@@ -36,13 +39,10 @@ public:
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
    virtual bool isAig() const { return (_type == "AIG"); }
-   bool isINV(int i, unsigned n) const 		// i = 1 for input; i = 0 for output
-   {
-      if (i == 1)
-         return in_inv[n];
-      else
-         return out_inv[n];
-	}
+   bool input_isINV(unsigned n) const
+   { return in_inv[n]; }
+	bool output_isINV(unsigned n) const
+   { return out_inv[n]; }
 
    size_t get_faninSize() { return _fanin.size(); }
    size_t get_fanoutSize() { return _fanout.size(); }
@@ -60,6 +60,7 @@ public:
    void dfsFanin(int, int, bool) const;
    void dfsFanout(int, int, bool) const;
    void dfs4Write(IdList& ) const;
+   void dfs4list() const;
 
    // Setting function
    void set_input_inv( bool isINV, CirGate* p)
@@ -72,6 +73,12 @@ public:
    
    }
 
+   void erase_fanout(unsigned k)
+   {
+      _fanout.erase(_fanout.begin() + k);
+      out_inv.erase(out_inv.begin() + k);
+   }
+
    void set_output_inv( bool isINV, CirGate* p)
    {	
       if (isINV)
@@ -81,8 +88,11 @@ public:
       _fanout.push_back(p);
    }
    void setSymbol(string& s) { _symbol = s; }
-   void reconnect(unsigned id); // for sweeping
+   void reconnect(unsigned); // for sweeping
+   bool simplify(CirGate*); // for optimize
+   void recon4opt(CirGate*, bool);
    static void setGlobalRef() { _globalRef++; }
+   bool isGlobalRef() const { return (_ref == _globalRef); }
 
 private:
 
@@ -94,7 +104,6 @@ protected:
    GateList _fanin, _fanout;
    vector<bool> in_inv, out_inv;
    void set2GlobalRef() const { _ref = _globalRef; }
-   bool isGlobalRef() const { return (_ref == _globalRef); }
 };
 
 class ConstGate: public CirGate

@@ -35,21 +35,15 @@ void
 CirMgr::sweep()
 {
    CirGate::setGlobalRef();
-   IdList idtemp;
    for (unsigned k = 0; k < o; ++k){
       CirGate* temp = getGate(m+k+1);
-      temp->dfs4Write(idtemp);
+      temp->dfs4list();
    }
    CirGate* temp;
    for (unsigned k = 0; k < a; ++k){
-      unsigned j = 0;
-      for ( ; j < idtemp.size(); ++j){
-         if (aig[k][0]/2 == idtemp[j])
-            break;
-      }
-      if (j == idtemp.size()){
-         temp = getGate(aig[k][0]/2);
-         temp-> reconnect(aig[k][0]/2);
+      temp = getGate(aig[k][0]/2);
+      if (!(temp->isGlobalRef())){
+         temp->reconnect(aig[k][0]/2);
          delete temp;
          aig.erase(aig.begin() + k);
          --a;
@@ -64,6 +58,26 @@ CirMgr::sweep()
 void
 CirMgr::optimize()
 {
+   CirGate* constGate = getGate(0);
+   CirGate::setGlobalRef();
+   IdList idtemp;
+   for (unsigned k = 0; k < o; ++k){
+      CirGate* temp = getGate(m+k+1);
+      temp->dfs4Write(idtemp);
+   }
+   CirGate* temp;
+   for (unsigned k = 0; k < idtemp.size(); ++k){
+      temp = getGate(idtemp[k]);
+      if (temp->simplify(constGate)){
+         for (unsigned j = 0; j < a; ++j){
+            if (aig[j][0]/2 == idtemp[k])
+               aig.erase(aig.begin() + j);
+               --a; --j;
+               delete temp;
+               break;
+         }
+      }
+   }
 }
 
 /***************************************************/

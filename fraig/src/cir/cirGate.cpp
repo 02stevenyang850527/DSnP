@@ -75,7 +75,7 @@ CirGate::dfs4NetList(int& num) const
       cout << " ";
       if (_fanin[k]-> getTypeStr() == "UNDEF")
          cout << "*";
-      if (isINV(1,k))
+      if (input_isINV(k))
          cout << "!";
       cout << _fanin[k]->getIdNo();
    }
@@ -104,7 +104,7 @@ CirGate::dfsFanin(int level, int recur, bool inv) const
    else{
       cout << endl;
       for (unsigned k = 0 ; k < size; ++k)
-         _fanin[k]->dfsFanin(level-1, recur+1, isINV(1,k));
+         _fanin[k]->dfsFanin(level-1, recur+1, input_isINV(k));
       if (size != 0)
          set2GlobalRef();
    }
@@ -130,7 +130,7 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
    else{
       cout << endl;
       for (unsigned k = 0; k < _fanout.size(); ++k)
-         _fanout[k]->dfsFanout(level-1, recur+1, isINV(0,k));
+         _fanout[k]->dfsFanout(level-1, recur+1, output_isINV(k));
       if (size != 0)
          set2GlobalRef();
    }
@@ -156,6 +156,18 @@ CirGate::dfs4Write(IdList& record) const
 }
 
 void
+CirGate::dfs4list() const
+{
+   if (this->_type == "UNDEF")
+      return;
+   for (unsigned k = 0; k < _fanin.size(); ++k){
+      if (!_fanin[k]->isGlobalRef())
+         _fanin[k]->dfs4list();
+   }
+   set2GlobalRef();
+}
+
+void
 CirGate::reconnect(unsigned id)
 {
    for (unsigned k = 0; k < _fanin.size(); ++k){
@@ -165,12 +177,14 @@ CirGate::reconnect(unsigned id)
                  << ") removed..." << endl;
             delete _fanin[k];
             _fanin.erase(_fanin.begin() + k);
+            in_inv.erase(in_inv.begin() + k);
             --k;
             break;
          }
          if (_fanin[k]->_type == "PI"){
             if (_fanin[k]->_fanout[j]->getIdNo() == id){
                _fanin[k]->_fanout.erase(_fanin[k]->_fanout.begin() + j);
+               _fanin[k]->out_inv.erase(_fanin[k]->out_inv.begin() + j);
                --j;
                break;
             }
@@ -182,6 +196,7 @@ CirGate::reconnect(unsigned id)
       for (unsigned j = 0; j < _fanout[k]->_fanin.size(); ++j){
          if (_fanout[k]->_fanin[j]->getIdNo() == id){
             _fanout[k]->_fanin.erase(_fanout[k]->_fanin.begin() + j);
+            _fanout[k]->in_inv.erase(_fanout[k]->in_inv.begin() + j);
             --j;
             break;
          }
@@ -189,3 +204,67 @@ CirGate::reconnect(unsigned id)
    }
    cout << "Sweeping: AIG" << "(" << id << ") removed..." << endl;
 }
+
+bool
+CirGate::simplify(CirGate* constGate)
+{
+   if (_fanin[0]->getIdNo() == _fanin[1]->getIdNo()){ // for identical gate
+      if (in_inv[0] == in_inv[1])
+        this->recon4opt(_fanin[0], in_inv[0]);
+      else  // for inverted gate
+        this->recon4opt(constGate, false);
+      return true;
+   }
+   else if (_fanin[0]->getIdNo() == 0 || _fanin[1]->getIdNo() == 0){
+      if (_fanin[0]->getIdNo() == 0){
+         if (in_inv[0] == false){
+           this->recon4opt(constGate, false); cout << "replace 0\n";}
+         else
+           this->recon4opt(_fanin[1], in_inv[1]);
+      }
+      else{
+         if (in_inv[1] == false)
+            this->recon4opt(constGate, false);
+         else
+            this->recon4opt(_fanin[0], in_inv[0]);
+      }
+      return true;
+   }
+   else
+      return false;
+}
+
+void
+CirGate::recon4opt(CirGate* temp, bool inv)
+{
+	bool inv_origin = false;
+   for (unsigned k = 0; k < _fanin.size(); ++k)
+   for (unsigned j = 0; j < _fanin[k]->get_fanoutSize(); ++j){
+      if (_fanin[k]->get_fanout(j)->getIdNo() == _id){
+			inv_origin = _fanin[k]->output_isINV(j);
+         _fanin[k]->erase_fanout(j);
+         --j;
+         break;
+      }
+   }
+
+   for (unsigned k = 0; k < _fanout.size(); ++k){
+      for (unsigned j = 0; j < _fanout[k]->_fanin.size(); ++j){
+         if (_fanout[k]->_fanin[j]->getIdNo() == _id){
+            _fanout[k]->_fanin[j] = temp;
+            _fanout[k]->in_inv[j] = inv_origin;
+            break;
+         }
+      }
+      temp->set_output_inv(out_inv[k], _fanout[k]);
+   }
+   _fanout.clear();
+   out_inv.clear();
+
+   cout << "Simplifying: " << temp->getIdNo() << " merging ";
+   if (inv)
+      cout << "!";
+   cout << _id << "..." << endl;
+}
+
+

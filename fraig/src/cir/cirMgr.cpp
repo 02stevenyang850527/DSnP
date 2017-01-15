@@ -425,7 +425,7 @@ CirMgr::writeAag(ostream& outfile) const
     //  GateList idd = temp->get_fanin_or_fanout(1);
       for (unsigned n = 0; n < 2; n++){
          unsigned id1 = temp->get_fanin(n)->getIdNo();
-         if (temp->isINV(1,n))
+         if (temp->input_isINV(n))
             outfile << " " << (2*id1+1);
          else
             outfile << " " << (2*id1);
