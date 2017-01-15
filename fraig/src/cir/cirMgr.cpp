@@ -422,7 +422,6 @@ CirMgr::writeAag(ostream& outfile) const
    for (unsigned k = 0; k < idtemp.size(); k++){
       CirGate* temp = getGate(idtemp[k]);
       outfile << 2*idtemp[k];
-    //  GateList idd = temp->get_fanin_or_fanout(1);
       for (unsigned n = 0; n < 2; n++){
          unsigned id1 = temp->get_fanin(n)->getIdNo();
          if (temp->input_isINV(n))
