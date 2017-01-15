@@ -39,15 +39,16 @@ public:
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
    virtual bool isAig() const { return (_type == "AIG"); }
-   bool input_isINV(unsigned n) const
-   { return in_inv[n]; }
-	bool output_isINV(unsigned n) const
-   { return out_inv[n]; }
+   bool input_isINV(size_t n) const
+   { return (((size_t)_fanin[n]) & NEG); }
+	bool output_isINV(size_t n) const
+   { return (((size_t)_fanout[n]) & NEG); }
 
    size_t get_faninSize() { return _fanin.size(); }
    size_t get_fanoutSize() { return _fanout.size(); }
-   CirGate* get_fanin(unsigned i) { return _fanin[i]; }
-   CirGate* get_fanout(unsigned i) { return _fanout[i]; }
+   CirGate* get_fanin(size_t i) const { return (CirGate*)(((size_t)_fanin[i]) & ~size_t(NEG)); }
+   CirGate* get_fanout(size_t i) const { return (CirGate*)(((size_t)_fanout[i]) & ~size_t(NEG)); }
+   size_t get_faninWithInv(size_t i) const { return (size_t)_fanin[i]; }
 
    // Printing functions
   // virtual void printGate() const {}
@@ -66,31 +67,27 @@ public:
    void set_input_inv( bool isINV, CirGate* p)
    {	
       if (isINV)
-         in_inv.push_back(true);
-      else
-         in_inv.push_back(false);
+         p = (CirGate*)((size_t)p + 1);
       _fanin.push_back(p);
-   
    }
+   void reset_fanin
+   (size_t i, size_t input){ _fanin[i] = (CirGate*)input; }
 
-   void erase_fanout(unsigned k)
+   void erase_fanout(size_t k)
    {
-      _fanout.erase(_fanout.begin() + k);
-      out_inv.erase(out_inv.begin() + k);
+     _fanout.erase(_fanout.begin() + k);
    }
 
    void set_output_inv( bool isINV, CirGate* p)
    {	
       if (isINV)
-         out_inv.push_back(true);
-      else
-         out_inv.push_back(false);
+         p = (CirGate*)((size_t)p + 1);
       _fanout.push_back(p);
    }
    void setSymbol(string& s) { _symbol = s; }
    void reconnect(unsigned); // for sweeping
    bool simplify(CirGate*); // for optimize
-   void recon4opt(CirGate*, bool);
+   void recon4opt(size_t);
    static void setGlobalRef() { _globalRef++; }
    bool isGlobalRef() const { return (_ref == _globalRef); }
 
@@ -99,10 +96,10 @@ private:
 protected:
    string _type, _symbol;
    unsigned _line, _id;
+   size_t _gateV;
    static unsigned _globalRef;
    mutable unsigned _ref;
    GateList _fanin, _fanout;
-   vector<bool> in_inv, out_inv;
    void set2GlobalRef() const { _ref = _globalRef; }
 };
 

@@ -64,8 +64,8 @@ CirGate::dfs4NetList(int& num) const
    if ( this-> _type == "UNDEF")
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      if (!_fanin[k]->isGlobalRef())
-         _fanin[k]->dfs4NetList(num);
+      if (!get_fanin(k)->isGlobalRef())
+         get_fanin(k)->dfs4NetList(num);
    }
    set2GlobalRef();
    cout << "[" << num << "] ";
@@ -73,11 +73,11 @@ CirGate::dfs4NetList(int& num) const
    cout << setw(4) << left << _type << _id;
    for (unsigned k = 0; k < _fanin.size(); ++k){
       cout << " ";
-      if (_fanin[k]-> getTypeStr() == "UNDEF")
+      if (get_fanin(k)-> getTypeStr() == "UNDEF")
          cout << "*";
       if (input_isINV(k))
          cout << "!";
-      cout << _fanin[k]->getIdNo();
+      cout << get_fanin(k)->getIdNo();
    }
    if (_symbol.size() > 0)
       cout << " (" << _symbol << ")";
@@ -104,7 +104,7 @@ CirGate::dfsFanin(int level, int recur, bool inv) const
    else{
       cout << endl;
       for (unsigned k = 0 ; k < size; ++k)
-         _fanin[k]->dfsFanin(level-1, recur+1, input_isINV(k));
+         get_fanin(k)->dfsFanin(level-1, recur+1, input_isINV(k));
       if (size != 0)
          set2GlobalRef();
    }
@@ -130,7 +130,7 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
    else{
       cout << endl;
       for (unsigned k = 0; k < _fanout.size(); ++k)
-         _fanout[k]->dfsFanout(level-1, recur+1, output_isINV(k));
+         get_fanout(k)->dfsFanout(level-1, recur+1, output_isINV(k));
       if (size != 0)
          set2GlobalRef();
    }
@@ -142,12 +142,12 @@ CirGate::dfs4Write(IdList& record) const
    if (this->_type == "UNDEF")
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      if (!_fanin[k]->isGlobalRef())
-         _fanin[k]->dfs4Write(record);
+      if (!get_fanin(k)->isGlobalRef())
+         get_fanin(k)->dfs4Write(record);
    }
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      if (_fanin[k]->getTypeStr() == "AIG" && !_fanin[k]->isGlobalRef()){
-         record.push_back(_fanin[k]->getIdNo());
+      if (get_fanin(k)->getTypeStr() == "AIG" && !get_fanin(k)->isGlobalRef()){
+         record.push_back(get_fanin(k)->getIdNo());
       }
    }
    if (!isGlobalRef() && _type == "AIG")
@@ -161,8 +161,8 @@ CirGate::dfs4list() const
    if (this->_type == "UNDEF")
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      if (!_fanin[k]->isGlobalRef())
-         _fanin[k]->dfs4list();
+      if (!get_fanin(k)->isGlobalRef())
+         get_fanin(k)->dfs4list();
    }
    set2GlobalRef();
 }
@@ -171,20 +171,18 @@ void
 CirGate::reconnect(unsigned id)
 {
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      for (unsigned j = 0; j < _fanin[k]->_fanout.size(); ++j){
-         if (_fanin[k]->_type == "UNDEF"){
-            cout << "Sweeping: UNDEF" << "(" << _fanin[k]->getIdNo()
+      for (unsigned j = 0; j < get_fanin(k)->_fanout.size(); ++j){
+         if (get_fanin(k)->_type == "UNDEF"){
+            cout << "Sweeping: UNDEF" << "(" << get_fanin(k)->getIdNo()
                  << ") removed..." << endl;
-            delete _fanin[k];
+            delete get_fanin(k);
             _fanin.erase(_fanin.begin() + k);
-            in_inv.erase(in_inv.begin() + k);
             --k;
             break;
          }
-         if (_fanin[k]->_type == "PI"){
-            if (_fanin[k]->_fanout[j]->getIdNo() == id){
-               _fanin[k]->_fanout.erase(_fanin[k]->_fanout.begin() + j);
-               _fanin[k]->out_inv.erase(_fanin[k]->out_inv.begin() + j);
+         if (get_fanin(k)->_type == "PI"){
+            if (get_fanin(k)->get_fanout(j)->getIdNo() == id){
+               get_fanin(k)->_fanout.erase(get_fanin(k)->_fanout.begin() + j);
                --j;
                break;
             }
@@ -193,10 +191,9 @@ CirGate::reconnect(unsigned id)
    }
 
    for (unsigned k = 0; k < _fanout.size(); ++k){
-      for (unsigned j = 0; j < _fanout[k]->_fanin.size(); ++j){
-         if (_fanout[k]->_fanin[j]->getIdNo() == id){
-            _fanout[k]->_fanin.erase(_fanout[k]->_fanin.begin() + j);
-            _fanout[k]->in_inv.erase(_fanout[k]->in_inv.begin() + j);
+      for (unsigned j = 0; j < get_fanout(k)->_fanin.size(); ++j){
+         if (get_fanout(k)->get_fanin(j)->getIdNo() == id){
+            get_fanout(k)->_fanin.erase(get_fanout(k)->_fanin.begin() + j);
             --j;
             break;
          }
@@ -208,25 +205,25 @@ CirGate::reconnect(unsigned id)
 bool
 CirGate::simplify(CirGate* constGate)
 {
-   if (_fanin[0]->getIdNo() == _fanin[1]->getIdNo()){ // for identical gate
-      if (in_inv[0] == in_inv[1])
-        this->recon4opt(_fanin[0], in_inv[0]);
+   if (get_fanin(0)->getIdNo() == get_fanin(1)->getIdNo()){ // for identical gate
+      if (input_isINV(0) == input_isINV(1))
+        this->recon4opt(get_faninWithInv(0));
       else  // for inverted gate
-        this->recon4opt(constGate, false);
+        this->recon4opt((size_t)constGate);
       return true;
    }
-   else if (_fanin[0]->getIdNo() == 0 || _fanin[1]->getIdNo() == 0){
-      if (_fanin[0]->getIdNo() == 0){
-         if (in_inv[0] == false){
-           this->recon4opt(constGate, false); cout << "replace 0\n";}
+   else if (get_fanin(0)->getIdNo() == 0 || get_fanin(1)->getIdNo() == 0){
+      if (get_fanin(0)->getIdNo() == 0){
+         if (input_isINV(0) == false)
+           this->recon4opt((size_t)constGate);
          else
-           this->recon4opt(_fanin[1], in_inv[1]);
+           this->recon4opt(get_faninWithInv(1));
       }
       else{
-         if (in_inv[1] == false)
-            this->recon4opt(constGate, false);
+         if (input_isINV(1) == false)
+            this->recon4opt((size_t)constGate);
          else
-            this->recon4opt(_fanin[0], in_inv[0]);
+            this->recon4opt(get_faninWithInv(0));
       }
       return true;
    }
@@ -235,34 +232,36 @@ CirGate::simplify(CirGate* constGate)
 }
 
 void
-CirGate::recon4opt(CirGate* temp, bool inv)
+CirGate::recon4opt(size_t input_with_INV)
 {
-	bool inv_origin = false;
+   CirGate* temp = (CirGate*)(input_with_INV & ~size_t(NEG));
    for (unsigned k = 0; k < _fanin.size(); ++k)
-   for (unsigned j = 0; j < _fanin[k]->get_fanoutSize(); ++j){
-      if (_fanin[k]->get_fanout(j)->getIdNo() == _id){
-			inv_origin = _fanin[k]->output_isINV(j);
-         _fanin[k]->erase_fanout(j);
+   for (unsigned j = 0; j < get_fanin(k)->get_fanoutSize(); ++j){
+      if (get_fanin(k)->get_fanout(j)->getIdNo() == _id){
+         get_fanin(k)->erase_fanout(j);
          --j;
-         break;
       }
    }
 
    for (unsigned k = 0; k < _fanout.size(); ++k){
-      for (unsigned j = 0; j < _fanout[k]->_fanin.size(); ++j){
-         if (_fanout[k]->_fanin[j]->getIdNo() == _id){
-            _fanout[k]->_fanin[j] = temp;
-            _fanout[k]->in_inv[j] = inv_origin;
-            break;
+      for (unsigned j = 0; j < get_fanout(k)->_fanin.size(); ++j){
+         if (get_fanout(k)->get_fanin(j)->getIdNo() == _id){
+            if (get_fanout(k)->input_isINV(j)){
+               if (!(input_with_INV & NEG))
+                  get_fanout(k)->reset_fanin(j, input_with_INV + 1);
+               else
+                  get_fanout(k)->reset_fanin(j, input_with_INV - 1);
+            }
+            else
+               get_fanout(k)->reset_fanin(j, input_with_INV);
          }
       }
-      temp->set_output_inv(out_inv[k], _fanout[k]);
+      temp->set_output_inv(output_isINV(k), get_fanout(k));
    }
    _fanout.clear();
-   out_inv.clear();
 
    cout << "Simplifying: " << temp->getIdNo() << " merging ";
-   if (inv)
+   if (input_with_INV & NEG)
       cout << "!";
    cout << _id << "..." << endl;
 }

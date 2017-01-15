@@ -70,11 +70,12 @@ CirMgr::optimize()
       temp = getGate(idtemp[k]);
       if (temp->simplify(constGate)){
          for (unsigned j = 0; j < a; ++j){
-            if (aig[j][0]/2 == idtemp[k])
+            if (aig[j][0]/2 == idtemp[k]){
                aig.erase(aig.begin() + j);
                --a; --j;
                delete temp;
                break;
+            }
          }
       }
    }
