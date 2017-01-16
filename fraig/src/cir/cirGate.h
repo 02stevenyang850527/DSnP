@@ -34,11 +34,12 @@ public:
    virtual ~CirGate() {}
 
    // Basic access methods
-   string getTypeStr() const { return _type; }
+   virtual GateType getType() const = 0;
+   virtual string getTypeStr() const = 0;
    string getSymStr() const { return _symbol; }
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
-   virtual bool isAig() const { return (_type == "AIG"); }
+   virtual bool isAig() const { return (getType() == AIG_GATE); }
    bool input_isINV(size_t n) const
    { return (((size_t)_fanin[n]) & NEG); }
 	bool output_isINV(size_t n) const
@@ -95,9 +96,8 @@ public:
 private:
 
 protected:
-   string _type, _symbol;
+   string _symbol;
    unsigned _line, _id;
-   size_t _gateV;
    static unsigned _globalRef;
    mutable unsigned _ref;
    GateList _fanin, _fanout;
@@ -110,8 +110,9 @@ public:
    ConstGate(){
       _id = 0;
       _line = 0;
-      _type = "CONST";
    }
+   virtual GateType getType() const { return CONST_GATE; }
+   virtual string getTypeStr() const {return "CONST"; }
 	~ConstGate() {}
 };
 
@@ -121,8 +122,9 @@ public:
    UndefGate(unsigned i){
       _id = i;
       _line = 0;
-      _type = "UNDEF";
    }
+   virtual GateType getType() const { return UNDEF_GATE; }
+   virtual string getTypeStr() const {return "UNDEF"; }
 	~UndefGate() {}
 };
 
@@ -132,8 +134,9 @@ public:
    POGate(unsigned i, unsigned li){
       _id = i;
       _line =li;
-      _type = "PO";
    }
+   virtual GateType getType() const { return PO_GATE; }
+   virtual string getTypeStr() const {return "PO"; }
 	~POGate() {}
 };
 
@@ -143,8 +146,9 @@ public:
    PIGate(unsigned i, unsigned li){
       _id = i;
       _line = li;
-      _type = "PI";
    }
+   virtual GateType getType() const { return PI_GATE; }
+   virtual string getTypeStr() const {return "PI"; }
 	~PIGate() {}
 };
 
@@ -154,8 +158,9 @@ public:
    AIGGate(unsigned i, unsigned li){
       _id = i;
       _line = li;
-      _type = "AIG";
    }
+   virtual GateType getType() const { return AIG_GATE; }
+   virtual string getTypeStr() const {return "AIG"; }
    ~AIGGate() {}
 };
 

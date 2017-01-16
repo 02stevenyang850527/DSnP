@@ -34,7 +34,7 @@ CirGate::reportGate() const
    stringstream s;
    string str;
    cout << "==================================================\n";
-   s << "= " << _type << "(" << _id << ")";
+   s << "= " << this->getTypeStr() << "(" << _id << ")";
    if (_symbol.size() > 0)
       s << "\"" << _symbol << "\"";
    s << ", line " << _line;
@@ -61,7 +61,7 @@ CirGate::reportFanout(int level) const
 void
 CirGate::dfs4NetList(int& num) const
 {
-   if ( this-> _type == "UNDEF")
+   if ( this-> getType() == UNDEF_GATE)
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
       if (!get_fanin(k)->isGlobalRef())
@@ -70,10 +70,10 @@ CirGate::dfs4NetList(int& num) const
    set2GlobalRef();
    cout << "[" << num << "] ";
    num++;
-   cout << setw(4) << left << _type << _id;
+   cout << setw(4) << left << getTypeStr() << _id;
    for (unsigned k = 0; k < _fanin.size(); ++k){
       cout << " ";
-      if (get_fanin(k)-> getTypeStr() == "UNDEF")
+      if (get_fanin(k)-> getType() == UNDEF_GATE)
          cout << "*";
       if (input_isINV(k))
          cout << "!";
@@ -93,7 +93,7 @@ CirGate::dfsFanin(int level, int recur, bool inv) const
       cout << "  ";
    if (inv)
       cout << "!";
-   cout << _type << " " << _id;
+   cout << getTypeStr() << " " << _id;
 
    unsigned size = _fanin.size();
 
@@ -119,7 +119,7 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
       cout << "  ";
    if (inv)
       cout << "!";
-   cout << _type << " " << _id ;
+   cout << getTypeStr() << " " << _id ;
 
    unsigned size = _fanout.size();
 
@@ -139,18 +139,18 @@ CirGate::dfsFanout(int level, int recur, bool inv) const
 void
 CirGate::dfs4Write(IdList& record) const
 {
-   if (this->_type == "UNDEF")
+   if (this->getType() == UNDEF_GATE)
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
       if (!get_fanin(k)->isGlobalRef())
          get_fanin(k)->dfs4Write(record);
    }
    for (unsigned k = 0; k < _fanin.size(); ++k){
-      if (get_fanin(k)->getTypeStr() == "AIG" && !get_fanin(k)->isGlobalRef()){
+      if (get_fanin(k)->getType() == AIG_GATE && !get_fanin(k)->isGlobalRef()){
          record.push_back(get_fanin(k)->getIdNo());
       }
    }
-   if (!isGlobalRef() && _type == "AIG")
+   if (!isGlobalRef() && getType() == AIG_GATE)
       record.push_back(_id);
    set2GlobalRef();
 }
@@ -158,7 +158,7 @@ CirGate::dfs4Write(IdList& record) const
 void
 CirGate::dfs4list() const
 {
-   if (this->_type == "UNDEF")
+   if (this->getType() == UNDEF_GATE)
       return;
    for (unsigned k = 0; k < _fanin.size(); ++k){
       if (!get_fanin(k)->isGlobalRef())
@@ -172,7 +172,7 @@ CirGate::reconnect(unsigned id)
 {
    for (unsigned k = 0; k < _fanin.size(); ++k){
       for (unsigned j = 0; j < get_fanin(k)->_fanout.size(); ++j){
-         if (get_fanin(k)->_type == "UNDEF"){
+         if (get_fanin(k)->getType() == UNDEF_GATE){
             cout << "Sweeping: UNDEF" << "(" << get_fanin(k)->getIdNo()
                  << ") removed..." << endl;
             delete get_fanin(k);
@@ -180,7 +180,7 @@ CirGate::reconnect(unsigned id)
             --k;
             break;
          }
-         if (get_fanin(k)->_type == "PI"){
+         if (get_fanin(k)->getType() == PI_GATE){
             if (get_fanin(k)->get_fanout(j)->getIdNo() == id){
                get_fanin(k)->_fanout.erase(get_fanin(k)->_fanout.begin() + j);
                --j;

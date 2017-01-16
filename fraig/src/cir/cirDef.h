@@ -23,4 +23,15 @@ class SatSolver;
 typedef vector<CirGate*> GateList;
 typedef vector<unsigned> IdList;
 
+enum GateType
+{
+   UNDEF_GATE = 0,
+   PI_GATE    = 1,
+   PO_GATE    = 2,
+   AIG_GATE   = 3,
+   CONST_GATE = 4,
+
+   TOT_GATE
+};
+
 #endif // CIR_DEF_H
