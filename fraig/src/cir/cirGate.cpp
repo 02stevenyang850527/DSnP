@@ -267,3 +267,32 @@ CirGate::recon4opt(size_t input_with_INV)
 }
 
 
+void
+CirGate::recon4str(size_t input_with_INV)
+{
+   CirGate* temp = (CirGate*)(input_with_INV & ~size_t(NEG));
+   for (unsigned k = 0; k < _fanin.size(); ++k)
+   for (unsigned j = 0; j < get_fanin(k)->get_fanoutSize(); ++j){
+      if (get_fanin(k)->get_fanout(j)->getIdNo() == _id){
+         get_fanin(k)->erase_fanout(j);
+         --j;
+      }
+   }
+
+   for (unsigned k = 0; k < _fanout.size(); ++k){
+      for (unsigned j = 0; j < get_fanout(k)->_fanin.size(); ++j){
+         if (get_fanout(k)->get_fanin(j)->getIdNo() == _id){
+            if (get_fanout(k)->input_isINV(j)){
+               if (!(input_with_INV & NEG))
+                  get_fanout(k)->reset_fanin(j, input_with_INV + 1);
+               else
+                  get_fanout(k)->reset_fanin(j, input_with_INV - 1);
+            }
+            else
+               get_fanout(k)->reset_fanin(j, input_with_INV);
+         }
+      }
+      temp->set_output_inv(output_isINV(k), get_fanout(k));
+   }
+   _fanout.clear();
+}

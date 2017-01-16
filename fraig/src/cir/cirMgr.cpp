@@ -393,7 +393,7 @@ CirMgr::printFloatGates() const
       for (unsigned k = 0; k < unused.size(); k++)
          cout << " " << unused[k];
       cout << endl;
-}
+   }
 }
 
 void
@@ -453,4 +453,3 @@ void
 CirMgr::writeGate(ostream& outfile, CirGate *g) const
 {
 }
-

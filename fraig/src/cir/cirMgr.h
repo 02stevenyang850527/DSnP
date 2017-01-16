@@ -52,6 +52,8 @@ public:
 
    // Member functions about fraig
    void strash();
+   void update_fanout();
+   void update_aig();
    void printFEC() const;
    void fraig();
 

@@ -88,6 +88,7 @@ public:
    void reconnect(unsigned); // for sweeping
    bool simplify(CirGate*); // for optimize
    void recon4opt(size_t);
+   void recon4str(size_t);
    static void setGlobalRef() { _globalRef++; }
    bool isGlobalRef() const { return (_ref == _globalRef); }
 
