@@ -64,6 +64,7 @@ CirMgr::strash()
             if (aig[k][0]/2 == idNo){
                aig.erase(aig.begin() + k);
                --a;
+               delete temp;
                break;
             }
          }
