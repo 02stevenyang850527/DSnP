@@ -24,7 +24,12 @@ using namespace std;
  class HashKey
  {
  public:
-    HashKey(size_t i0, size_t i1): _key((i0 << 32) + i1) { assert(i0 < i1); }
+    HashKey(size_t i0, size_t i1){
+       if (i0 < i1)
+          _key = (i0 << 32) + i1;
+       else
+          _key = (i1 << 32) + i0;
+    }
  
     size_t operator() () const { return _key; }
     bool operator == (const HashKey& k) const { return (_key == k._key); }
@@ -154,6 +159,14 @@ public:
       return false;
    }
 
+   bool checkINV(const HashKey& k) const {
+      size_t loc = bucketNum(k);
+      for (size_t i = 0; i < _buckets[loc].size(); ++i)
+         if (k == _buckets[loc][i].first)
+            return k.isInvert(_buckets[loc][i].first);
+
+      return false;
+   }
    // query if k is in the hash...
    // if yes, replace d with the data in the hash and return true;
    // else return false;
