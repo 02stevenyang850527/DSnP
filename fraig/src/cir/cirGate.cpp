@@ -156,6 +156,24 @@ CirGate::dfs4Write(IdList& record) const
 }
 
 void
+CirGate::dfs4WriteGate(IdList& record) const
+{
+   if (this->getType() == UNDEF_GATE)
+      return;
+   for (unsigned k = 0; k < _fanin.size(); ++k){
+      if (!get_fanin(k)->isGlobalRef())
+         get_fanin(k)->dfs4Write(record);
+   }
+   for (unsigned k = 0; k < _fanin.size(); ++k){
+      if (get_fanin(k)->getType() == AIG_GATE && !get_fanin(k)->isGlobalRef()){
+         record.push_back(get_fanin(k)->getIdNo());
+      }
+   }
+   if (!isGlobalRef() && (getType() == AIG_GATE || getType() == PI_GATE))
+      record.push_back(_id);
+   set2GlobalRef();
+}
+void
 CirGate::dfs4list() const
 {
    if (this->getType() == UNDEF_GATE)
@@ -300,8 +318,7 @@ CirGate::recon4str(size_t input_with_INV)
 bool
 POGate::simulate()
 {
-   isSim = get_fanin(0)->simulate();
-   if (isSim)
+   if ((isSim = get_fanin(0)->simulate()))
       _value = get_fanin(0)->getValue() ^ (0 - input_isINV(0));
    return isSim;
 }
@@ -313,9 +330,10 @@ AIGGate::simulate()
       return isSim;
    set2GlobalRef();
    isSim = get_fanin(0)->simulate() + get_fanin(1)->simulate();
-   if (isSim){
+   if ((isSim = get_fanin(0)->simulate() + get_fanin(1)->simulate()))
+   {
       unsigned val;
-      val = (get_fanin(0)->getValue() ^ (0 - input_isINV(0))) & (get_fanin(0)->getValue() ^ (0 - input_isINV(0)));
+      val = (get_fanin(0)->getValue() ^ (0 - input_isINV(0))) & (get_fanin(1)->getValue() ^ (0 - input_isINV(1)));
       if (_value == val) isSim = false;
       _value = val;
    }

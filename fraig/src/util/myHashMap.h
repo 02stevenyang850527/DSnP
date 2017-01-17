@@ -159,12 +159,12 @@ public:
       return false;
    }
 
-   bool checkINV(const HashKey& k) const {
+   bool checkINV(const HashKey& k) const {    //for FKey only (FKey is defined in CirSim.cpp)
       size_t loc = bucketNum(k);
       for (size_t i = 0; i < _buckets[loc].size(); ++i)
-         if (k == _buckets[loc][i].first)
+         if (k == _buckets[loc][i].first){
             return k.isInvert(_buckets[loc][i].first);
-
+         }
       return false;
    }
    // query if k is in the hash...

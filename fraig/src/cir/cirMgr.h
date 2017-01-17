@@ -76,7 +76,8 @@ private:
    vector <IdList*> _fecList;
    void linkAIG( vector<unsigned>& );
    void linkPO(unsigned,unsigned);
-   void sim(vector<unsigned>&,IdList&);
+   void sim(vector<unsigned>&);
+   void makeLog();
 };
 
 #endif // CIR_MGR_H

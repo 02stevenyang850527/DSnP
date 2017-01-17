@@ -398,7 +398,18 @@ CirMgr::printFloatGates() const
 
 void
 CirMgr::printFECPairs() const
-{
+{  
+//   sort((*_fecList.begin()[0]), (*_fecList.end())[0]);
+   for (unsigned k = 0; k < _fecList.size(); ++k){
+      cout << "[" << k << "]";
+      for (unsigned j = 0; j < _fecList[k]->size(); ++j){
+         cout << " " ;
+         if ((*_fecList[k])[j] % 2)
+            cout << "!";
+         cout << (*_fecList[k])[j]/2;
+      }
+      cout << endl;
+   }
 }
 
 void
@@ -452,4 +463,15 @@ CirMgr::writeAag(ostream& outfile) const
 void
 CirMgr::writeGate(ostream& outfile, CirGate *g) const
 {
+   IdList idtemp;
+   CirGate::setGlobalRef();
+   g->dfs4WriteGate(idtemp);
+   IdList piList, aigList;
+   for (unsigned k = 0; k < idtemp.size(); ++k){
+      if (getGate(idtemp[k])->getType() == PI_GATE)
+         piList.push_back(idtemp[k]);
+      else if (getGate(idtemp[k])->getType() == AIG_GATE)
+         aigList.push_back(idtemp[k]);
+   }
+   sort(piList.begin(), piList.end());
 }

@@ -64,6 +64,7 @@ public:
    void dfsFanin(int, int, bool) const;
    void dfsFanout(int, int, bool) const;
    void dfs4Write(IdList& ) const;
+   void dfs4WriteGate(IdList& ) const;
    void dfs4list() const;
 
    // Setting function
@@ -112,6 +113,7 @@ public:
    ConstGate(){
       _id = 0;
       _line = 0;
+      _value = 0;
    }
 	~ConstGate() {}
    virtual GateType getType() const { return CONST_GATE; }
