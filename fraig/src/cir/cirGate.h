@@ -30,7 +30,7 @@ class CirGate;
 class CirGate
 {
 public:
-   CirGate(){ _ref = 0;}
+   CirGate(): _value(0), _ref(0), _fec(0), isSim(false) {}
    virtual ~CirGate() {}
 
    // Basic access methods
@@ -39,7 +39,8 @@ public:
    string getSymStr() const { return _symbol; }
    unsigned getLineNo() const { return _line; }
    unsigned getIdNo() const { return _id; }
-   virtual bool isAig() const { return (getType() == AIG_GATE); }
+   unsigned getValue() const { return _value; }
+   virtual bool isAig() const { return false; }
    bool input_isINV(size_t n) const
    { return (((size_t)_fanin[n]) & NEG); }
 	bool output_isINV(size_t n) const
@@ -50,6 +51,7 @@ public:
    CirGate* get_fanin(size_t i) const { return (CirGate*)(((size_t)_fanin[i]) & ~size_t(NEG)); }
    CirGate* get_fanout(size_t i) const { return (CirGate*)(((size_t)_fanout[i]) & ~size_t(NEG)); }
    size_t get_faninWithInv(size_t i) const { return (size_t)_fanin[i]; }
+   virtual bool simulate() { return isSim; }
 
    // Printing functions
   // virtual void printGate() const {}
@@ -71,14 +73,8 @@ public:
          p = (CirGate*)((size_t)p + 1);
       _fanin.push_back(p);
    }
-   void reset_fanin
-   (size_t i, size_t input){ _fanin[i] = (CirGate*)input; }
-
-   void erase_fanout(size_t k)
-   {
-     _fanout.erase(_fanout.begin() + k);
-   }
-
+   void reset_fanin(size_t i, size_t input) { _fanin[i] = (CirGate*)input; }
+   void erase_fanout(size_t k) { _fanout.erase(_fanout.begin() + k); }
    void set_output_inv( bool isINV, CirGate* p)
    {	
       if (isINV)
@@ -86,6 +82,10 @@ public:
       _fanout.push_back(p);
    }
    void setSymbol(string& s) { _symbol = s; }
+   virtual void setValue(unsigned n) {} // only for PIGate
+   virtual void initValue() {} // only for AIGGate
+   void setFec(IdList* i, unsigned id) {_fec = i; _fecId = id; }
+
    void reconnect(unsigned); // for sweeping
    bool simplify(CirGate*); // for optimize
    void recon4opt(size_t);
@@ -97,9 +97,11 @@ private:
 
 protected:
    string _symbol;
-   unsigned _line, _id;
+   unsigned _line, _id, _fecId, _value;
    static unsigned _globalRef;
    mutable unsigned _ref;
+   IdList* _fec;
+   mutable bool isSim;
    GateList _fanin, _fanout;
    void set2GlobalRef() const { _ref = _globalRef; }
 };
@@ -111,9 +113,9 @@ public:
       _id = 0;
       _line = 0;
    }
+	~ConstGate() {}
    virtual GateType getType() const { return CONST_GATE; }
    virtual string getTypeStr() const {return "CONST"; }
-	~ConstGate() {}
 };
 
 class UndefGate: public CirGate
@@ -123,9 +125,9 @@ public:
       _id = i;
       _line = 0;
    }
+	~UndefGate() {}
    virtual GateType getType() const { return UNDEF_GATE; }
    virtual string getTypeStr() const {return "UNDEF"; }
-	~UndefGate() {}
 };
 
 class POGate: public CirGate
@@ -135,9 +137,10 @@ public:
       _id = i;
       _line =li;
    }
+	~POGate() {}
    virtual GateType getType() const { return PO_GATE; }
    virtual string getTypeStr() const {return "PO"; }
-	~POGate() {}
+   virtual bool simulate();
 };
 
 class PIGate: public CirGate
@@ -147,9 +150,10 @@ public:
       _id = i;
       _line = li;
    }
+	~PIGate() {}
    virtual GateType getType() const { return PI_GATE; }
    virtual string getTypeStr() const {return "PI"; }
-	~PIGate() {}
+   virtual void setValue(unsigned n) { _value = n; isSim = true; set2GlobalRef(); }
 };
 
 class AIGGate: public CirGate
@@ -159,9 +163,13 @@ public:
       _id = i;
       _line = li;
    }
+   ~AIGGate() {}
    virtual GateType getType() const { return AIG_GATE; }
    virtual string getTypeStr() const {return "AIG"; }
-   ~AIGGate() {}
+   virtual bool isAIG() const { return true; }
+   virtual bool simulate();
+   virtual void initValue()
+   { _value = (get_fanin(0)->getValue() ^ (0 - input_isINV(0))) &( get_fanin(1)->getValue() ^ (0 - input_isINV(1))); }
 };
 
 #endif // CIR_GATE_H

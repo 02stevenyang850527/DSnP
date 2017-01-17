@@ -296,3 +296,29 @@ CirGate::recon4str(size_t input_with_INV)
    }
    _fanout.clear();
 }
+
+bool
+POGate::simulate()
+{
+   isSim = get_fanin(0)->simulate();
+   if (isSim)
+      _value = get_fanin(0)->getValue() ^ (0 - input_isINV(0));
+   return isSim;
+}
+
+bool
+AIGGate::simulate()
+{
+   if (isGlobalRef())
+      return isSim;
+   set2GlobalRef();
+   isSim = get_fanin(0)->simulate() + get_fanin(1)->simulate();
+   if (isSim){
+      unsigned val;
+      val = (get_fanin(0)->getValue() ^ (0 - input_isINV(0))) & (get_fanin(0)->getValue() ^ (0 - input_isINV(0)));
+      if (_value == val) isSim = false;
+      _value = val;
+   }
+   return isSim;
+}
+

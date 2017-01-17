@@ -73,8 +73,10 @@ private:
    unsigned m, i, l, o, a;
    IdList input, output;
    vector<IdList> aig;
+   vector <IdList*> _fecList;
    void linkAIG( vector<unsigned>& );
    void linkPO(unsigned,unsigned);
+   void sim(vector<unsigned>&,IdList&);
 };
 
 #endif // CIR_MGR_H
