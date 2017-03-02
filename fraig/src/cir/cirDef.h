@@ -33,5 +33,4 @@ enum GateType
 
    TOT_GATE
 };
-
 #endif // CIR_DEF_H

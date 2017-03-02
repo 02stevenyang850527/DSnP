@@ -396,10 +396,27 @@ CirMgr::printFloatGates() const
    }
 }
 
+/*bool myFunction const( vector<unsigned>* p1, vector<unsigned>* p2)
+{
+   return (*p1)[0] < (*p2)[0];
+}
+*/
 void
 CirMgr::printFECPairs() const
 {  
-//   sort((*_fecList.begin()[0]), (*_fecList.end())[0]);
+//   sort(_fecList.begin(), _fecList.end(), myFunction);
+/*   bool flag = true;
+   for (unsigned k = 0; k < _fecList.size() -1 && flag; ++k){
+      flag = false;
+      for (unsigned j = 0; j < _fecList.size() - k - 1; ++j){
+         if ((*_fecList[k+1])[0] < (*_fecList[k])[0]){
+            IdList temp = *(_fecList[k+1]);
+            (*_fecList[k+1]) = (*_fecList[k]);
+            (*_fecList[k]) = temp;
+            flag = true;
+         }
+      }
+   }*/
    for (unsigned k = 0; k < _fecList.size(); ++k){
       cout << "[" << k << "]";
       for (unsigned j = 0; j < _fecList[k]->size(); ++j){
@@ -473,5 +490,20 @@ CirMgr::writeGate(ostream& outfile, CirGate *g) const
       else if (getGate(idtemp[k])->getType() == AIG_GATE)
          aigList.push_back(idtemp[k]);
    }
-   sort(piList.begin(), piList.end());
+   outfile << "aag " << g->getIdNo() << " " << piList.size() << " 0 1 " << aigList.size();
+   for (unsigned k = 0; k < piList.size(); ++k)
+      outfile << 2*piList[k] << endl;
+   for (unsigned k = 0; k < aigList.size(); ++k){
+      CirGate* temp = getGate(aigList[k]);
+      outfile << 2*aigList[k];
+      for (unsigned n = 0; n < 2; n++){
+         unsigned id1 = temp->get_fanin(n)->getIdNo();
+         if (temp->input_isINV(n))
+            outfile << " " << (2*id1+1);
+         else
+            outfile << " " << (2*id1);
+      }
+      outfile << endl;
+   }
 }
+

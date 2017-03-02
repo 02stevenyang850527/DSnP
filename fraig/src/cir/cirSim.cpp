@@ -107,8 +107,11 @@ CirMgr::fileSim(ifstream& patternFile)
               << ") does not match the number of inputs(" << i << ") in a circuit!!" << endl;
       }
       for (unsigned k = 0; k < i; ++k){
-         if (isdigit(line[k] - '0'))
-         cerr << "\nError: Pattern(" << line << ") contains a non-0/1 character(\'" << line[k] << "\')" << endl;
+         if (isdigit(line[k] - '0')){
+            cerr << "\nError: Pattern(" << line << ") contains a non-0/1 character(\'"
+                 << line[k] << "\')" << endl;
+            return;
+         }
          pattern[k] = (pattern[k] << 1) + line[k] - '0';
       }
       if ((num % 32) == 0){
@@ -163,15 +166,16 @@ CirMgr::sim(vector<unsigned>& pattern)
    }
    else{
       IdList idtemp;
-      CirGate::setGlobalRef();
+/*      CirGate::setGlobalRef();
       for (unsigned k = 0; k < o; ++k){
          CirGate* temp = getGate(m+k+1);
          temp->dfs4Write(idtemp);
-      }
-
+      }*/
       CirGate::setGlobalRef();
-      for (unsigned k = 0; k < idtemp.size(); ++k)
-         getGate(idtemp[k])->simulate();
+      for (unsigned k = 0; k < a; ++k){
+         CirGate* temp = getGate(aig[k][0]/2);
+         temp->simulate();
+      }
       for (unsigned k = 0; k < o; ++k)
          getGate(m+k+1)->simulate();
 
@@ -207,7 +211,22 @@ CirMgr::sim(vector<unsigned>& pattern)
          --k;
       }
    }
+   update_fecList(_fecList);
    cout << "Total #FEC Group = " << _fecList.size() << char(13) << flush;
+}
+
+void
+CirMgr::update_fecList(vector<IdList*>& v){
+   for (unsigned k = 0; k < v.size(); ++k){
+      if ((*v[k])[0] % 2){
+         for (unsigned j = 0; j < v[k]->size(); ++j){
+            if ((*v[k])[0] % 2)
+               --(*v[k])[j];
+            else
+               ++(*v[k])[j];
+         }
+      }
+   }
 }
 
 void

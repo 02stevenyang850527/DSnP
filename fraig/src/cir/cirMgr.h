@@ -54,6 +54,7 @@ public:
    void strash();
    void update_fanout();
    void update_aig();
+   void update_fecList(vector<IdList*>& );
    void printFEC() const;
    void fraig();
 
